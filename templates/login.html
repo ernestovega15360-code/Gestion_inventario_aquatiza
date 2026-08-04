@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Sistema de inicio de sesión de AquaTiza para el control y administración de rutas de distribución de agua.">
     <title>AquaTiza - Iniciar Sesión</title>
+    
+    <!-- PRECARGA DE LA IMAGEN LCP PRINCIPAL -->
+    <link rel="preload" as="image" href="{{ url_for('static', filename='post_acuatiza.png') }}" fetchpriority="high">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -195,8 +199,8 @@
 <body>
     <main class="login-wrapper">
         <div class="login-left">
-            <img src="{{ url_for('static', filename='post_acuatiza.png') }}" alt="AquaTiza Promocional Garrafones" loading="eager" fetchpriority="high">
-        </div>       
+            <img src="{{ url_for('static', filename='post_acuatiza.png') }}" alt="AquaTiza Promocional Garrafones" fetchpriority="high" decoding="async">
+        </div>      
         <div class="login-right">
             <div class="login-card">
                 <header class="login-header">
