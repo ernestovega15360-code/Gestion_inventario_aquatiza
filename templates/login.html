@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de inicio de sesión de AquaTiza para el control y administración de rutas de distribución de agua.">
+    <title>AquaTiza - Iniciar Sesión</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap"></noscript>
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+
+    <style>
+        :root {
+            --azul-brillante: #0277bd;
+            --azul-boton: #0b69c5;
+            --blanco-puro: #FFFFFF;
+            --gris-suave: #f0f4f8; 
+            --gris-texto: #1A1A1A;
+            --gris-placeholder: #576574;
+        }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--gris-suave);
+            background-image: radial-gradient(circle at 80% 20%, rgba(36, 162, 254, 0.05) 0%, transparent 20%),
+                              radial-gradient(circle at 90% 60%, rgba(36, 162, 254, 0.07) 0%, transparent 15%),
+                              radial-gradient(circle at 85% 85%, rgba(36, 162, 254, 0.04) 0%, transparent 25%);
+            margin: 0; 
+            padding: 0;
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .login-wrapper {
+            display: flex;
+            max-width: 1050px;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--blanco-puro);
+            overflow: hidden;
+        }
+        .login-left {
+            flex: 1.1;
+            background-color: #e1f5fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .login-left img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .login-right {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: transparent;
+        }
+        .login-card {
+            background-color: #edf4fa;
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 35px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+            box-sizing: border-box;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-header h1 { 
+            font-family: 'Montserrat', sans-serif; 
+            font-weight: 700; 
+            color: #000000; 
+            font-size: 2rem; 
+            margin: 0 0 5px 0;
+        }
+        .login-header p {
+            margin: 0;
+            color: #2d3748;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        label { 
+            display: block; 
+            font-weight: 700; 
+            font-size: 0.9rem; 
+            color: var(--gris-texto); 
+            margin-bottom: 8px; 
+        }
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-container i {
+            position: absolute;
+            left: 15px;
+            color: #2d3748;
+            font-size: 1rem;
+        }
+        input[type="text"], input[type="password"] { 
+            width: 100%; 
+            padding: 14px 16px 14px 45px; 
+            font-size: 0.95rem; 
+            color: #1a202c; 
+            background-color: var(--blanco-puro);
+            border: 1.5px solid #cbd5e1; 
+            border-radius: 12px; 
+            box-sizing: border-box; 
+            transition: all 0.2s ease;
+        }
+        input[type="text"]:focus, input[type="password"]:focus { 
+            outline: none; 
+            border-color: var(--azul-brillante); 
+            box-shadow: 0 0 0 3px rgba(2, 119, 189, 0.2); 
+        }
+        input::placeholder {
+            color: var(--gris-placeholder);
+        }
+        .btn-ingresar { 
+            width: 100%; 
+            padding: 15px; 
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700; 
+            font-size: 1.05rem; 
+            background-color: var(--azul-boton); 
+            color: var(--blanco-puro); 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            margin-top: 10px;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-ingresar:hover { 
+            background-color: #08529c; 
+        }
+        .btn-ingresar:disabled {
+            background-color: #5c93cc;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        .error-message { 
+            color: #9b1c1c; 
+            background-color: #fde8e8; 
+            border-left: 4px solid #e02424; 
+            padding: 12px; 
+            font-size: 0.9rem; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            font-weight: 600; 
+        }
+        @media (max-width: 768px) {
+            body {
+                align-items: flex-start;
+            }
+            .login-wrapper {
+                flex-direction: column;
+                height: auto;
+            }
+            .login-left {
+                width: 100%;
+                height: 250px;
+            }
+            .login-right {
+                width: 100%;
+                padding: 30px 15px;
+            }
+            .login-card {
+                max-width: 100%;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="login-wrapper">
+        <div class="login-left">
+            <img src="{{ url_for('static', filename='post_acuatiza.png') }}" alt="AquaTiza Promocional Garrafones" loading="eager" fetchpriority="high">
+        </div>       
+        <div class="login-right">
+            <div class="login-card">
+                <header class="login-header">
+                    <h1>¡Bienvenido!</h1>
+                    <p>Inicia sesión para continuar</p>
+                </header>
+                {% if mensaje_error %}
+                    <div class="error-message" role="alert" aria-live="assertive">{{ mensaje_error }}</div>
+                {% endif %}
+                <form id="loginForm" action="{{ url_for('login_procesar') }}" method="POST">
+                    <div class="form-group">
+                        <label for="usuario">Usuario</label>
+                        <div class="input-container">
+                            <i class="fa-solid fa-user" aria-hidden="true"></i>
+                            <input type="text" id="usuario" name="input_usuario" required placeholder="Ingresa tu usuario" autocomplete="username">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <div class="input-container">
+                            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                            <input type="password" id="password" name="input_password" required placeholder="Ingresa tu contraseña" autocomplete="current-password">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="btnSubmit" class="btn-ingresar" aria-live="polite">Iniciar sesión</button>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function() {
+            const boton = document.getElementById('btnSubmit');
+            boton.disabled = true;
+            boton.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Cargando...';
+        });
+    </script>
+</body>
+</html>

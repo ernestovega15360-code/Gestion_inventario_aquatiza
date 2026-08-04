@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaTiza - Panel de Control Dueño</title>
+
+    <!-- Carga directa y eficiente de fuentes sin JS/Triggers que bajen el score -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --azul-brillante: #24A2FE; 
+            --verde-esmeralda: #1b5e20; 
+            --turquesa-vibrante: #00838f;
+            --negro-absoluto: #000000;
+            --blanco-puro: #FFFFFF;
+            --gris-suave: #F4F6F8; 
+            --gris-texto: #1A1A1A;
+            --azul-borde: #DCE1E6;
+            --azul-botones-nav: #004085;
+            --texto-secundario: #37474F;
+        }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Open Sans', system-ui, -apple-system, blinkmacsystemfont, sans-serif;
+            background-color: var(--gris-suave);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 24px;
+            background-color: var(--azul-brillante);
+            position: relative;
+            min-height: 74px;
+        }
+        .logo-aquatiza {
+            width: 130px;
+            height: 50px;
+            object-fit: contain;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 8px 14px;
+            border-radius: 50px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .user-indicator {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #000000;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            background: none;
+            border: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+        .user-box {
+            border: 1px solid var(--azul-borde);
+            border-radius: 6px;
+            padding: 6px 16px;
+            background-color: var(--blanco-puro);
+            font-family: 'Montserrat', system-ui, sans-serif;
+            color: var(--gris-texto);
+            margin-left: 5px;
+            display: inline-block;
+        }
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 110%;
+            right: 0;
+            background-color: var(--blanco-puro);
+            border: 1px solid var(--azul-borde);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            width: 260px;
+            padding: 15px;
+            color: var(--gris-texto);
+            text-align: left;
+        }
+        .user-dropdown-menu.active {
+            display: block;
+        }
+        .user-dropdown-menu h4 {
+            margin: 0 0 10px 0;
+            font-family: 'Montserrat', system-ui, sans-serif;
+            font-size: 0.95rem;
+            color: #0056b3;
+            border-bottom: 1px solid var(--azul-borde);
+            padding-bottom: 5px;
+        }
+        .user-dropdown-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .user-dropdown-menu li {
+            font-size: 0.85rem;
+            padding: 6px 0;
+            border-bottom: 1px dashed #F0F2F5;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .user-dropdown-menu li:last-child {
+            border-bottom: none;
+        }
+        .nav-modules {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px 20px 10px 20px;
+        }
+        .btn-nav {
+            font-family: 'Montserrat', system-ui, sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 10px 24px;
+            border: 1px solid var(--azul-borde);
+            border-radius: 8px;
+            background-color: var(--blanco-puro);
+            color: var(--azul-botones-nav);
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .btn-nav.active {
+            background-color: #0056b3;
+            color: var(--blanco-puro);
+            border-color: #0056b3;
+        }
+        main {
+            flex: 1 0 auto;
+        }
+        .tab-content {
+            display: none;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 400px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .main-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .data-card {
+            background-color: var(--blanco-puro);
+            border: 1px solid var(--azul-borde);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom: 20px;
+            min-height: 150px;
+        }
+        h2 {
+            font-family: 'Montserrat', system-ui, sans-serif;
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: var(--negro-absoluto);
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .table-stock {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-stock th, .table-stock td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--azul-borde);
+        }
+        .table-stock th {
+            background-color: #EBF3F9;
+            font-family: 'Montserrat', system-ui, sans-serif;
+            color: var(--gris-texto);
+            font-weight: 700;
+        }
+        .table-stock thead.blue-bg th {
+            background-color: #0056b3;
+            color: var(--blanco-puro);
+        }
+        .input-stock {
+            width: 80px;
+            padding: 6px;
+            border: 1.5px solid var(--azul-borde);
+            border-radius: 4px;
+            color: var(--gris-texto);
+        }
+        .btn-action {
+            font-family: 'Montserrat', system-ui, sans-serif;
+            font-weight: 600;
+            padding: 10px 20px;
+            border: 1px solid #0056b3;
+            border-radius: 8px;
+            background-color: var(--blanco-puro);
+            color: #0056b3;
+            cursor: pointer;
+        }
+        .btn-save {
+            background-color: var(--verde-esmeralda);
+            color: var(--blanco-puro);
+            border-color: var(--verde-esmeralda);
+        }
+        .btn-save:disabled {
+            background-color: #9E9E9E;
+            border-color: #9E9E9E;
+            color: #FFFFFF;
+            cursor: not-allowed;
+        }
+        .box-number {
+            background-color: var(--blanco-puro);
+            border-bottom: 1px solid #EEF2F5;
+            padding: 16px 8px;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+        .box-number:last-child {
+            border-bottom: none;
+        }
+        .box-number span.icon {
+            margin-right: 12px;
+            font-size: 1.3rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .box-number span.text-label {
+            flex-grow: 1;
+            color: var(--gris-texto);
+        }
+        .box-number strong {
+            color: var(--negro-absoluto);
+            font-weight: 700;
+        }
+        .form-inline {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .form-control {
+            padding: 10px;
+            border: 1.5px solid var(--azul-borde);
+            border-radius: 6px;
+            font-size: 1rem;
+            color: var(--gris-texto);
+        }
+        .input-ruta {
+            border: 1.5px solid var(--azul-borde);
+            background-color: #f8fafd;
+            font-weight: 600;
+            color: #0056b3;
+            text-align: center;
+        }
+        .input-ruta:focus, .select-ruta:focus {
+            border-color: var(--azul-brillante);
+            outline: none;
+        }
+        .select-ruta {
+            border: 1.5px solid var(--azul-borde);
+            background-color: #eef5fc;
+            font-weight: 600;
+            color: var(--azul-botones-nav);
+            cursor: pointer;
+        }
+        .footer-dashboard {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            background-color: transparent;
+            min-height: 60px;
+        }
+        .eslogan-box {
+            font-family: 'Montserrat', system-ui, sans-serif;
+            font-weight: 700;
+            color: var(--texto-secundario);
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+        .btn-logout {
+            border: 1px solid var(--azul-borde);
+            padding: 10px 24px;
+            border-radius: 8px;
+            color: var(--gris-texto);
+            text-decoration: none;
+            font-weight: 600;
+            background: var(--blanco-puro);
+            font-family: 'Montserrat', system-ui, sans-serif;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .flash-messages {
+            width: 100%;
+            max-width: 1200px;
+            margin: 15px auto 0;
+            padding: 0 20px;
+        }
+        .flash-msg {
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--blanco-puro);
+            transition: opacity 0.5s ease;
+        }
+        .flash-success { background-color: var(--verde-esmeralda); }
+        .flash-error { background-color: #c62828; }
+        .tabla-deslizable {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid var(--azul-borde);
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+        .tabla-deslizable table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        @media (max-width: 768px) {
+            .header-top {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .nav-modules {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .btn-nav {
+                flex: 1 1 calc(50% - 10px);
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            .main-dashboard {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .footer-dashboard {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-top">
+        <img src="{{ url_for('static', filename='Logotipo_Aquatiza.png') }}" alt="AquaTiza" class="logo-aquatiza" width="130" height="50" decoding="async">
+        <button class="user-indicator" id="user-trigger" aria-expanded="false" aria-haspopup="true" aria-controls="user-menu">
+            <span>Usuario:</span> <span class="user-box">{{ nombre }}</span>
+            <div class="user-dropdown-menu" id="user-menu" role="region" aria-label="Funciones Autorizadas">
+                <h4>Funciones Autorizadas</h4>
+                <ul>
+                    <li>⚙️ Editar stock</li>
+                    <li>📊 Ver resumen de caja</li>
+                    <li>🔍 Consultar información</li>
+                    <li>💸 Registrar gastos</li>
+                    <li>👥 Ver y agregar usuarios</li>
+                    <li>🚀 Registrar venta</li>
+                    <li>📋 Ver historial de venta (empleados y propio)</li>
+                </ul>
+            </div>
+        </button>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-msg {% if category == 'error' %}flash-error{% else %}flash-success{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="nav-modules">
+        <button class="btn-nav" id="tab-btn-inventario" onclick="switchTab('inventario')">Inventario</button>
+        <button class="btn-nav" id="tab-btn-finanzas" onclick="switchTab('finanzas')">Gestión de empresa</button>
+        <button class="btn-nav" id="tab-btn-rutas" onclick="switchTab('rutas')">Control Rutas</button>
+    </div>
+
+    <main>
+        <div class="tab-content" id="tab-inventario">
+            <div class="main-dashboard">
+                <div>
+                    <h2>Estado del stock actual</h2>
+                    <div class="data-card">
+                        <form id="form-inventario" action="{{ url_for('guardar_inventario') }}" method="POST">
+                            <table class="table-stock">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Garrafón (20L)</td>
+                                        <td><input type="number" class="input-stock" id="ed_g20" name="stock_garrafon_20" value="{{ inv.stock_garrafon_20 }}" min="0" max="1000" aria-label="Stock Garrafón 20L" disabled></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Garrafón (5L)</td>
+                                        <td><input type="number" class="input-stock" id="ed_g5" name="stock_garrafon_5" value="{{ inv.stock_garrafon_5 }}" min="0" max="1000" aria-label="Stock Garrafón 5L" disabled></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tapas</td>
+                                        <td><input type="number" class="input-stock" id="ed_tapas" name="stock_tapas" value="{{ inv.stock_tapas }}" min="0" max="1000" aria-label="Stock Tapas" disabled></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sellos térmicos</td>
+                                        <td><input type="number" class="input-stock" id="ed_sellos" name="stock_sellos" value="{{ inv.stock_sellos }}" min="0" max="1000" aria-label="Stock Sellos térmicos" disabled></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mermas detectadas</td>
+                                        <td><input type="number" class="input-stock" value="{{ inv.stock_mermas }}" min="0" aria-label="Mermas detectadas" disabled></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                                <button type="button" class="btn-action btn-save" onclick="permitirEdicion()">+ Editar catálogo</button>
+                                <button type="button" class="btn-action btn-save" id="save-stock-btn" onclick="confirmarGuardado()" disabled>💾 Guardar</button>
+                            </div>
+                        </form>
+                        {% if inv.act %}
+                            <div style="margin-top:15px; font-size:0.85rem; color:#455A64; font-weight:600;">⏳ Última modificación: {{ inv.act }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <h2>Resumen de caja</h2>
+                    <div class="data-card">
+                        <div class="box-number">
+                            <span class="icon">👛</span>
+                            <span class="text-label">Ingresos hoy:</span>
+                            <strong>$ {{ ingresos_hoy }}</strong>
+                        </div>
+                        <div class="box-number">
+                            <span class="icon">💳</span>
+                            <span class="text-label">Egresos hoy:</span>
+                            <strong>$ {{ egresos_hoy }}</strong>
+                        </div>
+                        <div class="box-number">
+                            <span class="icon">🧳</span>
+                            <span class="text-label">Mermas hoy:</span>
+                            <strong>{{ mermas_hoy }}</strong>
+                        </div>
+                        <div class="box-number" style="margin-top: 10px; border-top: 1px dashed var(--azul-borde); padding-top: 20px;">
+                            <span class="icon" style="color: #0056b3;">💰</span>
+                            <span class="text-label" style="font-weight: 600;">Caja total real:</span>
+                            <strong style="color: #0056b3; font-size: 1.2rem;">$ {{ ganancia_real }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-finanzas">
+            <div class="main-dashboard">
+                <div>
+                    <h2>Balance Financiero Histórico</h2>
+                    <div class="data-card">
+                        <form action="{{ url_for('inventario_dashboard') }}" method="GET" class="form-inline">
+                            <input type="hidden" name="tab" value="finanzas">
+                            <label id="lbl-desde" for="input-desde">Desde:</label>
+                            <input type="date" id="input-desde" name="desde" value="{{ desde }}" class="form-control" aria-labelledby="lbl-desde">
+                            <label id="lbl-hasta" for="input-hasta">Hasta:</label>
+                            <input type="date" id="input-hasta" name="hasta" value="{{ hasta }}" class="form-control" aria-labelledby="lbl-hasta">
+                            <button type="submit" class="btn-action">Filtrar</button>
+                            <a href="{{ url_for('inventario_dashboard', tab='finanzas') }}" class="btn-action" style="text-decoration:none; padding:10px 15px;">Limpiar</a>
+                        </form>
+
+                        <div style="margin-top: 20px;">
+                            <div class="box-number">
+                                <span class="icon" style="color: #1b5e20;">💵</span>
+                                <span class="text-label">Ingresos totales:</span>
+                                <strong>$ {{ ingresos_hist }}</strong>
+                            </div>
+                            <div class="box-number">
+                                <span class="icon" style="color: #c62828;">🧰</span>
+                                <span class="text-label">Egresos totales:</span>
+                                <strong>- $ {{ egresos_hist }}</strong>
+                            </div>
+                            <div class="box-number">
+                                <span class="icon" style="color: #0056b3;">💲</span>
+                                <span class="text-label">Balance total neto:</span>
+                                <strong>$ {{ balance_neto }}</strong>
+                            </div>
+                        </div>
+
+                        {% if desde and hasta %}
+                        <div style="margin-top: 20px; border-top: 1px solid var(--azul-borde); padding-top: 15px;">
+                            <h4>Desglose de Ventas (Filtro)</h4>
+                            <table class="table-stock" style="font-size: 0.9rem;">
+                                <tr><td>Llenados 20L:</td><td>{{ desglose_ventas.llenados_20 }} pzs</td></tr>
+                                <tr><td>Llenados 5L:</td><td>{{ desglose_ventas.llenados_5 }} pzs</td></tr>
+                                <tr><td>Envases Nuevos Vendidos:</td><td>{{ desglose_ventas.total_envases }} pzs</td></tr>
+                                <tr><td style="color: #c62828; font-weight: 600;">Mermas Registradas:</td><td style="color: #c62828; font-weight: 700;">{{ desglose_ventas.total_mermas }} pzs</td></tr>
+                            </table>
+
+                            <h4 style="margin-top: 15px;">Gastos realizados (Filtro)</h4>
+                            <table class="table-stock" style="font-size: 0.9rem;">
+                                {% for gasto in gastos_agrupados %}
+                                <tr><td>{{ gasto.concepto }}:</td><td>$ {{ gasto.total_gasto }}</td></tr>
+                                {% else %}
+                                <tr><td colspan="2">No hay gastos en este periodo.</td></tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                        <div style="margin-top: 15px; text-align: center;">
+                            <a href="{{ url_for('descargar_reporte', desde=desde, hasta=hasta) }}" style="background-color: var(--verde-esmeralda); color: var(--blanco-puro); padding: 10px 15px; text-decoration: none; border-radius: 6px; display: block; font-weight: bold; font-family: 'Montserrat', system-ui, sans-serif;">📥 Descargar Reporte CSV</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <h2>Registrar Gastos</h2>
+                    <div class="data-card">
+                        <form action="{{ url_for('registrar_gasto') }}" method="POST" class="form-inline" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Estás seguro de registrar este gasto? Se descontará del balance.');">
+                            <label id="lbl-concepto" for="select-concepto" style="display:none;">Concepto</label>
+                            <select id="select-concepto" name="concepto" class="form-control" aria-labelledby="lbl-concepto" required>
+                                <option value="">-- Seleccionar Concepto --</option>
+                                <option value="Renta">Renta</option>
+                                <option value="Sueldo">Sueldo</option>
+                                <option value="Luz">Luz</option>
+                                <option value="Mantenimiento">Mantenimiento</option>
+                                <option value="Reparaciones">Reparaciones</option>
+                                <option value="Gasolina">Gasolina</option>
+                                <option value="Pipa de agua">Pipa de agua</option>
+                            </select>
+                            <label id="lbl-monto" for="input-monto" style="display:none;">Monto</label>
+                            <input type="number" id="input-monto" name="monto" class="form-control" step="0.01" placeholder="Monto $" aria-labelledby="lbl-monto" required>
+                            <label id="lbl-fecha-gasto" for="input-fecha-gasto" style="display:none;">Fecha</label>
+                            <input type="date" id="input-fecha-gasto" name="fecha" class="form-control" aria-labelledby="lbl-fecha-gasto" required>
+                            <button type="submit" class="btn-action btn-save">💾 Guardar Gasto</button>
+                        </form>
+                    </div>
+
+                    <h2>Control de acceso y personal</h2>
+                    <div class="data-card">
+                        <form action="{{ url_for('gestion_usuario') }}" method="POST" class="form-inline" style="margin-bottom:20px;" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Estás seguro de registrar este nuevo usuario en el sistema?');">
+                            <input type="hidden" name="accion" value="agregar">
+                            <label id="lbl-usuario" for="input-usuario" style="display:none;">Usuario</label>
+                            <input type="text" id="input-usuario" name="usuario" placeholder="Usuario" class="form-control" aria-labelledby="lbl-usuario" required>
+                            <label id="lbl-password" for="input-password" style="display:none;">Contraseña</label>
+                            <input type="text" id="input-password" name="password" placeholder="Contraseña" class="form-control" aria-labelledby="lbl-password" required>
+                            <label id="lbl-rol" for="select-rol" style="display:none;">Rol</label>
+                            <select id="select-rol" name="rol" class="form-control" aria-labelledby="lbl-rol" required>
+                                <option value="Empleado">Empleado</option>
+                                <option value="Dueño">Dueño</option>
+                            </select>
+                            <button type="submit" class="btn-action btn-save">➕ Agregar</button>
+                        </form>
+                        <div class="tabla-deslizable" style="max-height: 250px;">
+                            <table class="table-stock">
+                                <thead class="blue-bg">
+                                    <tr>
+                                        <th>usuario</th>
+                                        <th>rol</th>
+                                        <th>estado</th>
+                                        <th>cambiar contraseña</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for u in usuarios %}
+                                    <tr>
+                                        <td>{{ u.nom_usuario }}</td>
+                                        <td>{{ u.rol }}</td>
+                                        <td><span style="color: var(--verde-esmeralda); font-weight: 600;">activo</span></td>
+                                        <td>
+                                            <form action="{{ url_for('gestion_usuario') }}" method="POST" style="display: flex; gap: 5px; align-items: center;">
+                                                <input type="hidden" name="accion" value="cambiar_pass">
+                                                <input type="hidden" name="id_usuario" value="{{ u.id_usuario }}">
+                                                <label id="lbl-pass-{{ u.id_usuario }}" for="input-pass-{{ u.id_usuario }}" style="display:none;">Nueva Clave</label>
+                                                <input type="password" id="input-pass-{{ u.id_usuario }}" name="nueva_password" placeholder="Nueva clave" class="form-control" style="padding: 3px 8px; font-size: 0.85rem; width: 120px;" aria-labelledby="lbl-pass-{{ u.id_usuario }}" required>
+                                                <button type="submit" class="btn-action btn-save" style="padding: 3px 8px; font-size: 0.8rem;">🔑 Actualizar</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-rutas">
+            <h2>Registrar mis rutas</h2>
+            <div class="data-card">
+                {% if not rutas_activas %}
+                    <form action="{{ url_for('ruta_salida') }}" method="POST" class="form-inline" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Confirmas la salida de ruta con las cantidades seleccionadas?');">
+                        <label id="lbl-cant20" for="input-cant20" style="font-weight: 600; color: var(--gris-texto);">Garrafón 20L:</label>
+                        <input type="number" id="input-cant20" name="cantidad_20" class="form-control input-ruta" min="0" value="0" required style="width: 80px;" aria-labelledby="lbl-cant20">
+                        
+                        <label id="lbl-cant5" for="input-cant5" style="font-weight: 600; color: var(--gris-texto);">Garrafón 5L:</label>
+                        <input type="number" id="input-cant5" name="cantidad_5" class="form-control input-ruta" min="0" value="0" required style="width: 80px;" aria-labelledby="lbl-cant5">
+                        
+                        <label id="lbl-tipo-entrega" for="select-tipo-entrega" style="display:none;">Tipo Entrega</label>
+                        <select id="select-tipo-entrega" name="tipo_entrega" class="form-control select-ruta" aria-labelledby="lbl-tipo-entrega" required>
+                            <option value="Entrega Normal">Entrega Normal</option>
+                            <option value="A Casa">A Casa</option>
+                            <option value="A Negocio">A Negocio</option>
+                        </select>
+                        <button type="submit" class="btn-action btn-save">🚀 Registrar Salida</button>
+                    </form>
+                {% else %}
+                    <form action="{{ url_for('ruta_regreso') }}" method="POST" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Estás seguro de registrar el retorno de estas rutas? Se calcularan las ganancias automáticamente.');">
+                        {% for r in rutas_activas %}
+                            <div style="background:#FFF9C4; padding:15px; border-radius:6px; margin-bottom:15px; font-weight:600; color:#E65100; border: 1px solid #FFE082;">
+                                🛑 Ruta Activa (ID: {{ r.id_movimiento }}): Llevas <strong>{{ r.g_salidas }} pzs</strong> de {{ r.tipo_garrafon }}.
+                            </div>
+                            <div class="form-inline" style="background: #F8F9FA; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--azul-borde);">
+                                <label id="lbl-llenos-{{ r.id_movimiento }}" for="input-llenos-{{ r.id_movimiento }}" style="font-weight: 600;">Llega Llenos:</label>
+                                <input type="number" id="input-llenos-{{ r.id_movimiento }}" name="regreso_llenos_{{ r.id_movimiento }}" class="form-control input-ruta" min="0" value="0" required style="width: 70px;" aria-labelledby="lbl-llenos-{{ r.id_movimiento }}">
+                                
+                                <label id="lbl-vacios-{{ r.id_movimiento }}" for="input-vacios-{{ r.id_movimiento }}" style="font-weight: 600;">Llega Vacíos:</label>
+                                <input type="number" id="input-vacios-{{ r.id_movimiento }}" name="regreso_vacios_{{ r.id_movimiento }}" class="form-control input-ruta" min="0" value="0" required style="width: 70px;" aria-labelledby="lbl-vacios-{{ r.id_movimiento }}">
+                                
+                                <label id="lbl-envases-{{ r.id_movimiento }}" for="input-envases-{{ r.id_movimiento }}" style="font-weight: 600;">Vendió Envase:</label>
+                                <input type="number" id="input-envases-{{ r.id_movimiento }}" name="envases_vendidos_{{ r.id_movimiento }}" class="form-control input-ruta" min="0" value="0" required style="width: 70px;" aria-labelledby="lbl-envases-{{ r.id_movimiento }}">
+                                
+                                <label id="lbl-mermas-{{ r.id_movimiento }}" for="input-mermas-{{ r.id_movimiento }}" style="font-weight: 600;">Mermas:</label>
+                                <input type="number" id="input-mermas-{{ r.id_movimiento }}" name="mermas_{{ r.id_movimiento }}" class="form-control input-ruta" min="0" value="0" required style="width: 70px;" aria-labelledby="lbl-mermas-{{ r.id_movimiento }}">
+                            </div>
+                        {% endfor %}
+                        <button type="submit" class="btn-action btn-save">🏁 Guardar Retorno(s)</button>
+                    </form>
+                {% endif %}
+            </div>
+
+            <h2>Historial de registros</h2>
+            <div class="tabla-deslizable">
+                <div class="data-card" style="overflow-x:auto; margin-bottom:0;">
+                    <table class="table-stock">
+                        <thead>
+                            <tr>
+                                <th>Fecha/Hora</th>
+                                <th>Operador</th>
+                                <th>Producto</th>
+                                <th>Llevó</th>
+                                <th>G. Vacíos</th>
+                                <th>G. Llenos</th>
+                                <th>Vendió Envase</th>
+                                <th>Mermas</th>
+                                <th>Ganancia</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in historial_rutas %}
+                            <tr>
+                                <td>{{ r.fecha_hora }}</td>
+                                <td>{{ r.empleado }}</td>
+                                <td>{{ r.tipo_garrafon }}</td>
+                                <td><strong>{{ r.g_salidas }}</strong></td>
+                                <td>{{ r.g_regreso_vacios }}</td>
+                                <td>{{ r.g_regreso_llenos }}</td>
+                                <td>{{ r.g_envases_vendidos }}</td>
+                                <td style="color:#c62828; font-weight:600;">{{ r.mermas_ruta }}</td>
+                                <td style="color:var(--verde-esmeralda); font-weight:bold;">$ {{ r.ganancia }}</td>
+                                <td>
+                                    {% if r.estado_bucle == 'En Ruta' %}
+                                        <span style="padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:600; background:#FFF9C4; color:#E65100;">
+                                            {{ r.estado_bucle }}
+                                        </span>
+                                    {% else %}
+                                        <span style="padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:600; background:#C8E6C9; color:#1b5e20;">
+                                            {{ r.estado_bucle }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>    
+            </div>
+        </div>
+    </main>
+
+    <div class="footer-dashboard">
+        <div class="eslogan-box">AGUA PURA, VIDA PURA</div>
+        <a href="{{ url_for('logout') }}" class="btn-logout" onclick="return confirm('¿Seguro que deseas cerrar sesión?');">Cerrar Sesión</a>
+    </div>
+
+    <script>
+        const userTrigger = document.getElementById('user-trigger');
+        const userMenu = document.getElementById('user-menu');
+
+        userTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isExpanded = userTrigger.getAttribute('aria-expanded') === 'true';
+            userTrigger.setAttribute('aria-expanded', !isExpanded);
+            userMenu.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function() {
+            userMenu.classList.remove('active');
+            userTrigger.setAttribute('aria-expanded', 'false');
+        });
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.btn-nav').forEach(el => el.classList.remove('active'));
+            const selectedTab = document.getElementById('tab-' + tabName);
+            const selectedBtn = document.getElementById('tab-btn-' + tabName);
+            if(selectedTab && selectedBtn) {
+                selectedTab.classList.add('active');
+                selectedBtn.classList.add('active');
+                localStorage.setItem('activeOwnerTab', tabName);
+                const url = new URL(window.location);
+                url.searchParams.set('tab', tabName);
+                window.history.pushState({}, '', url);
+            }
+        }
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            const cachedTab = localStorage.getItem('activeOwnerTab');
+            if (tabParam) switchTab(tabParam);
+            else if (cachedTab) switchTab(cachedTab);
+            else switchTab('inventario');
+
+            setTimeout(function() {
+                const mensajesFlash = document.querySelectorAll('.flash-msg');
+                mensajesFlash.forEach(function(mensaje) {
+                    mensaje.style.opacity = '0';
+                    setTimeout(function() {
+                        mensaje.remove();
+                    }, 500);
+                });
+            }, 5000);
+        }
+
+        function permitirEdicion() {
+            document.getElementById('ed_g20').disabled = false;
+            document.getElementById('ed_g5').disabled = false;
+            document.getElementById('ed_tapas').disabled = false;
+            document.getElementById('ed_sellos').disabled = false;
+            document.getElementById('save-stock-btn').disabled = false;
+        }
+
+        function confirmarGuardado() {
+            if (confirm("¿Estás seguro de que deseas guardar los cambios en el catálogo de inventario? Esta acción modificará el stock total.")) {
+                document.getElementById('ed_g20').disabled = false;
+                document.getElementById('ed_g5').disabled = false;
+                document.getElementById('ed_tapas').disabled = false;
+                document.getElementById('ed_sellos').disabled = false;
+                procesarEnvioConDeshacer(document.getElementById('form-inventario'));
+            }
+        }
+
+        let temporizadorEnvio = null;
+        let cuentaRegresiva = null;
+        function procesarEnvioConDeshacer(formulario, mensajeConfirmacion) {
+            if (mensajeConfirmacion && !confirm(mensajeConfirmacion)) {
+                return false;
+            }
+            eliminarToastDeshacer(true);
+            const toast = document.createElement('div');
+            toast.id = 'whatsapp-undo-toast';
+            toast.style.position = 'fixed';
+            toast.style.bottom = '30px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.backgroundColor = '#1A1A1A';
+            toast.style.color = '#FFFFFF';
+            toast.style.padding = '14px 24px';
+            toast.style.borderRadius = '8px';
+            toast.style.boxShadow = '0 4px 16px rgba(0,0,0,0.3)';
+            toast.style.zIndex = '9999';
+            toast.style.display = 'flex';
+            toast.style.alignItems = 'center';
+            toast.style.gap = '20px';
+            toast.style.fontFamily = "'Montserrat', system-ui, sans-serif";
+            toast.style.fontSize = '0.95rem';
+
+            let segundosRestantes = 5;
+            toast.innerHTML = `
+                <span>Guardando cambios en ${segundosRestantes}s...</span>
+                <button id="btn-undo-action" style="background-color: var(--azul-brillante); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: 'Montserrat', system-ui, sans-serif;">DESHACER</button>
+            `;
+            document.body.appendChild(toast);
+
+            temporizadorEnvio = setTimeout(() => {
+                eliminarToastDeshacer(false);
+                formulario.submit();
+            }, 5000);
+
+            cuentaRegresiva = setInterval(() => {
+                segundosRestantes--;
+                if (segundosRestantes > 0) {
+                    toast.querySelector('span').innerText = `Guardando cambios en ${segundosRestantes}s...`;
+                } else {
+                    clearInterval(cuentaRegresiva);
+                }
+            }, 1000);
+
+            document.getElementById('btn-undo-action').addEventListener('click', function() {
+                eliminarToastDeshacer(true);
+                const edG20 = document.getElementById('ed_g20');
+                if(edG20) edG20.disabled = true;
+                const edG5 = document.getElementById('ed_g5');
+                if(edG5) edG5.disabled = true;
+                const edTapas = document.getElementById('ed_tapas');
+                if(edTapas) edTapas.disabled = true;
+                const edSellos = document.getElementById('ed_sellos');
+                if(edSellos) edSellos.disabled = true;
+                const saveBtn = document.getElementById('save-stock-btn');
+                if(saveBtn) saveBtn.disabled = true;
+                alert('Acción deshecha con éxito. Los datos no se guardaron.');
+            });
+        }
+
+        function eliminarToastDeshacer(cancelarEnvio) {
+            const toastExistente = document.getElementById('whatsapp-undo-toast');
+            if (toastExistente) {
+                toastExistente.remove();
+            }
+            if (cancelarEnvio) {
+                clearTimeout(temporizadorEnvio);
+                clearInterval(cuentaRegresiva);
+            }
+        }
+    </script>
+</body>
+</html>

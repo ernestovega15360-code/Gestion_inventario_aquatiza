@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Panel de control e inicio/retorno de rutas de entrega para repartidores de AquaTiza.">
+    <title>AquaTiza - Operación de Rutas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --azul-brillante: #24A2FE; 
+            --verde-esmeralda: #1b5e20; 
+            --negro-absoluto: #000000;
+            --blanco-puro: #FFFFFF;
+            --gris-suave: #F4F6F8; 
+            --gris-texto: #1A1A1A;
+            --azul-borde: #DCE1E6;
+            --texto-secundario: #37474F;
+        }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--gris-suave); 
+            margin: 0; 
+            padding: 0;
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 24px;
+            background-color: var(--azul-brillante);
+            position: relative;
+        }
+        .logo-aquatiza {
+            width: 130px;
+            height: auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 8px 14px;
+            border-radius: 50px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .user-indicator {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--blanco-puro);
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            background: none;
+            border: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+        .user-box {
+            border: 1px solid var(--azul-borde);
+            border-radius: 6px;
+            padding: 6px 16px;
+            background-color: var(--blanco-puro);
+            font-family: 'Montserrat', sans-serif;
+            color: var(--gris-texto);
+            margin-left: 8px;
+            display: inline-block;
+        }
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 110%;
+            right: 0;
+            background-color: var(--blanco-puro);
+            border: 1px solid var(--azul-borde);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            width: 280px;
+            padding: 15px;
+            color: var(--gris-texto);
+            text-align: left;
+        }
+        .user-dropdown-menu.active {
+            display: block;
+        }
+        .user-dropdown-menu h3 {
+            margin: 0 0 10px 0;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+            color: var(--azul-brillante);
+            border-bottom: 1px solid var(--azul-borde);
+            padding-bottom: 5px;
+        }
+        .user-dropdown-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .user-dropdown-menu li {
+            font-size: 0.85rem;
+            padding: 6px 0;
+            border-bottom: 1px dashed #F0F2F5;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .main-container { flex: 1; max-width: 600px; width: 100%; margin: 30px auto; padding: 20px; box-sizing: border-box; }
+        .data-card { background-color: var(--blanco-puro); border: 1px solid var(--azul-borde); border-radius: 16px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        h2 { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1.3rem; color: var(--negro-absoluto); margin-top: 0; margin-bottom: 20px; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--gris-texto); }
+        .form-control { width: 100%; padding: 12px; border: 1.5px solid var(--azul-borde); border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+        .form-control:focus { border-color: var(--azul-brillante); outline: 2px solid var(--azul-brillante); }
+        .btn-submit { width: 100%; padding: 14px; font-weight: 700; font-size: 1.05rem; border: none; border-radius: 8px; cursor: pointer; color: white; display: block; text-align: center; text-decoration: none; font-family: 'Montserrat', sans-serif; }
+        .btn-start { background-color: var(--azul-brillante); }
+        .btn-end { background-color: var(--verde-esmeralda); }
+        .alert-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        }
+        .alert-error {
+            background-color: #C62828;
+            color: #FFFFFF;
+            border: none;
+        }
+        .alert-success {
+            background-color: #2E7D32;
+            color: #FFFFFF;
+            border: none;
+        }
+        .btn-close-alert {
+            background: transparent;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #FFFFFF;
+            cursor: pointer;
+            margin-left: 15px;
+            opacity: 0.8;
+        }
+        .btn-close-alert:hover {
+            opacity: 1;
+        }
+        .fade-out {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+        .footer-dashboard { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .eslogan-box { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--texto-secundario); letter-spacing: 1px; font-size: 0.9rem; }
+        .btn-logout { border: 1px solid var(--azul-borde); padding: 10px 24px; border-radius: 8px; color: var(--gris-texto); text-decoration: none; font-weight: 600; background: var(--blanco-puro); font-family: 'Montserrat', sans-serif; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: white; padding: 40px 30px; border-radius: 12px; max-width: 450px; width: 90%; text-align: center; font-size: 1rem; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--gris-texto); }
+        .modal-buttons { margin-top: 30px; display: flex; justify-content: space-between; gap: 15px; }
+        .btn-confirm { background: var(--verde-esmeralda); color: white; border: none; padding: 15px; width: 100%; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold;}
+        .btn-cancel { background: #c62828; color: white; border: none; padding: 15px; width: 100%; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold;}
+        .undo-toast {
+            display: none;
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #212121;
+            color: #ffffff;
+            padding: 16px 28px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 2000;
+            align-items: center;
+            gap: 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .btn-undo-toast {
+            background-color: #e65100;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.85rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+        @media (max-width: 768px) {
+            .header-top { flex-direction: column; gap: 15px; text-align: center; }
+            .main-container { margin: 10px auto; }
+            .footer-dashboard { flex-direction: column; gap: 15px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-top">
+        <img src="{{ url_for('static', filename='Logotipo_Aquatiza.png') }}" alt="AquaTiza Logotipo" class="logo-aquatiza" width="130" height="45">
+        <button class="user-indicator" id="user-trigger" aria-expanded="false" aria-haspopup="true" aria-controls="user-menu">
+            <span>Usuario:</span> 
+            <span class="user-box">{{ nombre }}</span>
+            <div class="user-dropdown-menu" id="user-menu" role="region" aria-label="Funciones Autorizadas">
+                <h3>Funciones Autorizadas</h3>
+                <ul>
+                    <li>📦 <strong>Agregar salida:</strong> Registrar garrafones que se lleva para iniciar la ruta.</li>
+                    <li>🏁 <strong>Registrar retorno:</strong> Devolución de garrafones llenos, vacíos, envases vendidos o mermas.</li>
+                </ul>
+            </div>
+        </button>
+    </header>
+
+    <main class="main-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div id="alerts-container">
+            {% for category, message in messages %}
+              <div class="alert-box {% if category == 'error' %}alert-error{% else %}alert-success{% endif %}">
+                <span>{{ message }}</span>
+                <button type="button" class="btn-close-alert" onclick="this.parentElement.remove()" title="Cerrar">✕</button>
+              </div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        {% if not rutas_activas %}
+        <div class="data-card">
+            <h2>Registrar Salida de Viaje</h2>
+            <form id="formSalida" onsubmit="validarSalida(event)" action="/ruta_salida" method="POST">
+                <div style="background-color: #FFF3E0; border-left: 4px solid #E65100; padding: 12px; margin-bottom: 20px; font-size: 0.9rem; color: #BF360C; font-weight: 600; border-radius: 4px;">
+                    Puedes llevarte un solo tipo de garrafón o ambos. Solo escribe la cantidad en el que necesites.
+                </div>
+                <div class="form-group">
+                    <label for="c20">Garrafón (20L) - Cantidad:</label>
+                    <input type="number" id="c20" name="cantidad_20" class="form-control" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="c5">Garrafón (5L) - Cantidad:</label>
+                    <input type="number" id="c5" name="cantidad_5" class="form-control" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="tipo_entrega">Tipo de Cliente</label>
+                    <select id="tipo_entrega" name="tipo_entrega" class="form-control" required>
+                        <option value="Entrega Normal">Entrega Normal</option>
+                        <option value="A Casa">A Casa</option>
+                        <option value="A Negocio">A Negocio</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit btn-start">🔒 Guardar e Iniciar Viaje</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="data-card">
+            <h2>Registrar Retorno de Unidad</h2>
+            <form id="formRetorno" onsubmit="mostrarModal(event, '¿Estás completamente seguro de registrar este retorno y liquidar los garrafones?')" action="/ruta_regreso" method="POST">
+                {% for ruta in rutas_activas %}
+                <div style="background-color: #FFF9C4; border-left: 4px solid #FBC02D; padding: 12px; margin-bottom: 20px; font-size: 0.95rem; color: #F57F17; font-weight: 600; border-radius: 4px;">
+                    🟣 Ruta Activa (ID: {{ ruta.id_movimiento }}): Llevas <strong>{{ ruta.g_salidas }} pzs de {{ ruta.tipo_garrafon }}</strong>.
+                </div>
+                <div class="form-group">
+                    <label for="regreso_llenos_{{ ruta.id_movimiento }}">¿Con cuántos regresó LLENOS ({{ ruta.tipo_garrafon }})?</label>
+                    <input type="number" id="regreso_llenos_{{ ruta.id_movimiento }}" name="regreso_llenos_{{ ruta.id_movimiento }}" class="form-control" min="0" value="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="regreso_vacios_{{ ruta.id_movimiento }}">¿Con cuántos regresó VACÍOS (Vendidos)?</label>
+                    <input type="number" id="regreso_vacios_{{ ruta.id_movimiento }}" name="regreso_vacios_{{ ruta.id_movimiento }}" class="form-control" min="0" value="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="envases_vendidos_{{ ruta.id_movimiento }}">¿Vendió Envase Nuevo de este tipo?</label>
+                    <input type="number" id="envases_vendidos_{{ ruta.id_movimiento }}" name="envases_vendidos_{{ ruta.id_movimiento }}" class="form-control" min="0" value="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="mermas_{{ ruta.id_movimiento }}">¿Hubo mermas de este garrafón?</label>
+                    <input type="number" id="mermas_{{ ruta.id_movimiento }}" name="mermas_{{ ruta.id_movimiento }}" class="form-control" min="0" value="0" required>
+                </div>
+                <hr style="border: 1px solid var(--azul-borde); margin-bottom: 25px;">
+                {% endfor %}
+                <button type="submit" class="btn-submit btn-end">🏁 Guardar Retorno y Cerrar Viaje</button>
+            </form>
+        </div>
+        {% endif %}
+    </main>
+
+    <footer class="footer-dashboard">
+        <div class="eslogan-box">AGUA PURA, VIDA PURA</div>
+        <a href="/logout" class="btn-logout">🚪 Cerrar Sesión</a>
+    </footer>
+
+    <div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalMensaje">
+        <div class="modal-box">
+            <p id="modalMensaje">¿Estás seguro?</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-confirm" id="btnConfirmarAccion">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="undoToast" class="undo-toast" role="status" aria-live="polite">
+        <span>⌛ Guardando en <strong id="undoCountdown">5</strong> segundos...</span>
+        <button class="btn-undo-toast" onclick="deshacerEnvio()">↩ Deshacer</button>
+    </div>
+
+    <script>
+        const userTrigger = document.getElementById('user-trigger');
+        const userMenu = document.getElementById('user-menu');
+        userTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isActive = userMenu.classList.toggle('active');
+            userTrigger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+        });
+        document.addEventListener('click', function() {
+            userMenu.classList.remove('active');
+            userTrigger.setAttribute('aria-expanded', 'false');
+        });
+        let formPendiente = null;
+        let timerEnvio = null;
+        let intervaloCountdown = null;
+        let segundosRestantes = 5;
+        function mostrarModal(evento, mensaje) {
+            evento.preventDefault(); 
+            formPendiente = evento.target;
+            document.getElementById('modalMensaje').innerText = mensaje;
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+        function cerrarModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+        document.getElementById('btnConfirmarAccion').addEventListener('click', function() {
+            if (formPendiente) {
+                cerrarModal();
+                segundosRestantes = 5;
+                document.getElementById('undoCountdown').innerText = segundosRestantes;
+                const toast = document.getElementById('undoToast');
+                toast.style.display = 'flex';
+                const btnSubmit = formPendiente.querySelector('.btn-submit');
+                if(btnSubmit) btnSubmit.style.opacity = '0.5';
+                intervaloCountdown = setInterval(function() {
+                    segundosRestantes--;
+                    document.getElementById('undoCountdown').innerText = segundosRestantes;
+                    if (segundosRestantes <= 0) {
+                        clearInterval(intervaloCountdown);
+                    }
+                }, 1000);
+                timerEnvio = setTimeout(function() {
+                    formPendiente.submit();
+                }, 5000);
+            }
+        });
+        function deshacerEnvio() {
+            clearTimeout(timerEnvio);
+            clearInterval(intervaloCountdown);
+            document.getElementById('undoToast').style.display = 'none';
+            if (formPendiente) {
+                const btnSubmit = formPendiente.querySelector('.btn-submit');
+                if(btnSubmit) btnSubmit.style.opacity = '1';
+            }
+            formPendiente = null;
+            alert("↩ Envío cancelado. Puedes corregir o verificar los cambios que necesites.");
+        }
+        function validarSalida(evento) {
+            let cant20 = parseInt(document.getElementById('c20').value) || 0;
+            let cant5 = parseInt(document.getElementById('c5').value) || 0;
+            if(cant20 === 0 && cant5 === 0) {
+                alert("⚠️ Debes registrar al menos un garrafón en alguna de las dos categorías para salir.");
+                evento.preventDefault();
+                return false;
+            }
+            mostrarModal(evento, '¿Estás seguro de registrar esta salida con las cantidades especificadas?');
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert-box');
+                alerts.forEach(function(alert) {
+                    alert.classList.add('fade-out');
+                    setTimeout(() => alert.remove(), 400);
+                });
+            }, 4000);
+        });
+    </script>
+
+</body>
+</html>
