@@ -4,7 +4,15 @@ from flask_compress import Compress
 from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import re
+
+# Definición de la zona horaria local (México Central)
+ZONA_HORARIA_MX = ZoneInfo('America/Mexico_City')
+
+def obtener_fecha_hora_mx():
+    """Devuelve la fecha y hora actual en la zona horaria de México."""
+    return datetime.now(ZONA_HORARIA_MX)
 
 try:
     from flask_compress import Compress
@@ -93,7 +101,8 @@ def inventario_dashboard():
         elif 'merma' in tipo: inv['stock_mermas'] = f['cant_total']
     if fecha_mas_reciente:
         inv['act'] = fecha_mas_reciente.strftime('%d/%m/%y %I:%M %p')
-    hoy = datetime.now().strftime('%Y-%m-%d')
+    
+    hoy = obtener_fecha_hora_mx().strftime('%Y-%m-%d')
     cursor.execute("SELECT IFNULL(SUM(ganancia), 0) AS ingresos FROM Movimiento WHERE DATE(fecha_hora) = %s AND estado_bucle = 'Terminado'", (hoy,))
     ingresos_hoy = cursor.fetchone()['ingresos']
     cursor.execute("SELECT IFNULL(SUM(monto), 0) AS egresos FROM Gastos WHERE fecha = %s", (hoy,))
@@ -182,6 +191,10 @@ def guardar_inventario():
     except (ValueError, TypeError):
         flash("❌ Error: Las cantidades ingresadas deben ser números válidos.", "error")
         return redirect(url_for('inventario_dashboard'))
+    
+    # Obtenemos la fecha y hora exacta ajustada a México
+    ahora_mx = obtener_fecha_hora_mx().strftime('%Y-%m-%d %H:%M:%S')
+
     conexion = obtener_conexion()
     cursor = conexion.cursor()
     mapeo = [
@@ -191,7 +204,7 @@ def guardar_inventario():
         (sellos, "%sellos%")
     ]
     for cantidad, concepto in mapeo:
-        cursor.execute("UPDATE Inventario SET cant_total = %s, u_actualizacion = NOW() WHERE tipo_garrafon LIKE %s", (cantidad, concepto))
+        cursor.execute("UPDATE Inventario SET cant_total = %s, u_actualizacion = %s WHERE tipo_garrafon LIKE %s", (cantidad, ahora_mx, concepto))
     conexion.commit()
     cursor.close()
     conexion.close()
@@ -306,18 +319,21 @@ def ruta_salida():
             conexion.close()
             flash("❌ Error: Stock insuficiente para garrafones de 5L.", "error")
             return redirect(destino_redireccion)
+    
+    ahora_mx = obtener_fecha_hora_mx().strftime('%Y-%m-%d %H:%M:%S')
+
     if cant_20 > 0:
         cursor.execute("UPDATE Inventario SET cant_total = cant_total - %s WHERE id_inventario = %s", (cant_20, inv_20['id_inventario']))
         cursor.execute("""
             INSERT INTO Movimiento (g_salidas, g_regreso_vacios, g_regreso_llenos, g_envases_vendidos, ganancia, tipo_movimiento, fecha_hora, id_usuario_fk, id_inventario_fk, estado_bucle)
-            VALUES (%s, 0, 0, 0, 0.00, %s, NOW(), %s, %s, 'En Ruta')
-        """, (cant_20, tipo_mov, id_usuario, inv_20['id_inventario']))
+            VALUES (%s, 0, 0, 0, 0.00, %s, %s, %s, %s, 'En Ruta')
+        """, (cant_20, tipo_mov, ahora_mx, id_usuario, inv_20['id_inventario']))
     if cant_5 > 0:
         cursor.execute("UPDATE Inventario SET cant_total = cant_total - %s WHERE id_inventario = %s", (cant_5, inv_5['id_inventario']))
         cursor.execute("""
             INSERT INTO Movimiento (g_salidas, g_regreso_vacios, g_regreso_llenos, g_envases_vendidos, ganancia, tipo_movimiento, fecha_hora, id_usuario_fk, id_inventario_fk, estado_bucle)
-            VALUES (%s, 0, 0, 0, 0.00, %s, NOW(), %s, %s, 'En Ruta')
-        """, (cant_5, tipo_mov, id_usuario, inv_5['id_inventario']))
+            VALUES (%s, 0, 0, 0, 0.00, %s, %s, %s, %s, 'En Ruta')
+        """, (cant_5, tipo_mov, ahora_mx, id_usuario, inv_5['id_inventario']))
     conexion.commit()
     cursor.close()
     conexion.close()
@@ -344,6 +360,9 @@ def ruta_regreso():
         conexion.close()
         return redirect(destino)
     movimientos_cerrados = 0
+    
+    ahora_mx = obtener_fecha_hora_mx().strftime('%Y-%m-%d %H:%M:%S')
+
     for ruta in rutas_activas:
         id_mov = str(ruta['id_movimiento'])
         llenos_raw = request.form.get(f'regreso_llenos_{id_mov}') or request.form.get('regreso_llenos')
@@ -389,7 +408,7 @@ def ruta_regreso():
             cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE id_inventario = %s", (retorno_total, id_inv))
         if mermas > 0:
             cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE tipo_garrafon LIKE '%merma%'", (mermas,))
-            cursor.execute("INSERT INTO Historial_mermas (cant_mermas, tipo_mermas, fecha_hora, id_movimiento_fk) VALUES (%s, 'Mermas de Ruta', NOW(), %s)", (mermas, id_mov))
+            cursor.execute("INSERT INTO Historial_mermas (cant_mermas, tipo_mermas, fecha_hora, id_movimiento_fk) VALUES (%s, 'Mermas de Ruta', %s, %s)", (mermas, ahora_mx, id_mov))
         cursor.execute("""
             UPDATE Movimiento
             SET g_regreso_vacios = %s, g_regreso_llenos = %s, g_envases_vendidos = %s, ganancia = %s, estado_bucle = 'Terminado'
