@@ -6,16 +6,16 @@
     <meta name="description" content="Sistema de inicio de sesión de AquaTiza para el control y administración de rutas de distribución de agua.">
     <title>AquaTiza - Iniciar Sesión</title>
     
-    <!-- PRECARGA DE LA IMAGEN LCP PRINCIPAL -->
     <link rel="preload" as="image" href="{{ url_for('static', filename='post_acuatiza.png') }}" fetchpriority="high">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap"></noscript>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript> 
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 
     <style>
@@ -56,11 +56,13 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            min-height: 100%;
         }
         .login-left img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            aspect-ratio: 515 / 774;
         }
         .login-right {
             flex: 1;
@@ -199,7 +201,7 @@
 <body>
     <main class="login-wrapper">
         <div class="login-left">
-            <img src="{{ url_for('static', filename='post_acuatiza.png') }}" alt="AquaTiza Promocional Garrafones" fetchpriority="high" decoding="async">
+            <img src="{{ url_for('static', filename='post_acuatiza.png') }}" alt="AquaTiza Promocional Garrafones" width="515" height="774" fetchpriority="high" decoding="async">
         </div>      
         <div class="login-right">
             <div class="login-card">
