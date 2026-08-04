@@ -36,8 +36,10 @@ def obtener_conexion():
 def login_vista():
     return render_template('login.html', mensaje_error=None)
 
-@app.route('/ingresar', methods=['POST'])
+@app.route('/ingresar', methods=['GET', 'POST'])
 def login_procesar():
+    if request.method == 'GET':
+        return redirect(url_for('login_vista'))
     txt_usuario = request.form['input_usuario']
     txt_password = request.form['input_password']
     conexion = obtener_conexion()
