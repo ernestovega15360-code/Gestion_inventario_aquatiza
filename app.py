@@ -26,7 +26,7 @@ def obtener_conexion():
             password=os.environ.get('DB_PASSWORD', 'AVNS_YaPZ5FIFC52_ib0mVxE'),
             database=os.environ.get('DB_NAME', 'defaultdb'),
             port=int(os.environ.get('DB_PORT', 28303)),
-            ssl_mode='REQUIRED'
+            ssl_disabled=False
         )
     except mysql.connector.Error as error:
         print(f"Error de conexión: {error}")
