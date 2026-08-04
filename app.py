@@ -21,11 +21,12 @@ if compress_disponible:
 def obtener_conexion():
     try:
         return mysql.connector.connect(
-            host=os.environ.get('DB_HOST', 'localhost'),
-            user=os.environ.get('DB_USER', 'root'),
-            password=os.environ.get('DB_PASSWORD', 'generalskorge360'),
-            database=os.environ.get('DB_NAME', 'aquatiza_db'),
-            port=int(os.environ.get('DB_PORT', 3306))
+            host=os.environ.get('DB_HOST', 'mysql-3ab14a49-aquatiza.aivencloud.com'),
+            user=os.environ.get('DB_USER', 'avnadmin'),
+            password=os.environ.get('DB_PASSWORD', 'AVNS_YaPZ5FIFC52_ib0mVxE'),
+            database=os.environ.get('DB_NAME', 'defaultdb'),
+            port=int(os.environ.get('DB_PORT', 28303)),
+            ssl_mode='REQUIRED'
         )
     except mysql.connector.Error as error:
         print(f"Error de conexión: {error}")
