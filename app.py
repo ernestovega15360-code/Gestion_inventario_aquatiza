@@ -7,25 +7,19 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import re
 
-# Definición de la zona horaria local (México Central)
 ZONA_HORARIA_MX = ZoneInfo('America/Mexico_City')
-
 def obtener_fecha_hora_mx():
-    """Devuelve la fecha y hora actual en la zona horaria de México."""
     return datetime.now(ZONA_HORARIA_MX)
-
 try:
     from flask_compress import Compress
     compress_disponible = True
 except ImportError:
     compress_disponible = False
-
 app = Flask(__name__)
 app.secret_key = 'aquatiza_secure_master_key'
 
 if compress_disponible:
     Compress(app)
-
 def obtener_conexion():
     try:
         return mysql.connector.connect(
@@ -101,7 +95,6 @@ def inventario_dashboard():
         elif 'merma' in tipo: inv['stock_mermas'] = f['cant_total']
     if fecha_mas_reciente:
         inv['act'] = fecha_mas_reciente.strftime('%d/%m/%y %I:%M %p')
-    
     hoy = obtener_fecha_hora_mx().strftime('%Y-%m-%d')
     cursor.execute("SELECT IFNULL(SUM(ganancia), 0) AS ingresos FROM Movimiento WHERE DATE(fecha_hora) = %s AND estado_bucle = 'Terminado'", (hoy,))
     ingresos_hoy = cursor.fetchone()['ingresos']
@@ -191,10 +184,7 @@ def guardar_inventario():
     except (ValueError, TypeError):
         flash("❌ Error: Las cantidades ingresadas deben ser números válidos.", "error")
         return redirect(url_for('inventario_dashboard'))
-    
-    # Obtenemos la fecha y hora exacta ajustada a México
     ahora_mx = obtener_fecha_hora_mx().strftime('%Y-%m-%d %H:%M:%S')
-
     conexion = obtener_conexion()
     cursor = conexion.cursor()
     mapeo = [
@@ -319,9 +309,7 @@ def ruta_salida():
             conexion.close()
             flash("❌ Error: Stock insuficiente para garrafones de 5L.", "error")
             return redirect(destino_redireccion)
-    
     ahora_mx = obtener_fecha_hora_mx().strftime('%Y-%m-%d %H:%M:%S')
-
     if cant_20 > 0:
         cursor.execute("UPDATE Inventario SET cant_total = cant_total - %s WHERE id_inventario = %s", (cant_20, inv_20['id_inventario']))
         cursor.execute("""
@@ -360,9 +348,7 @@ def ruta_regreso():
         conexion.close()
         return redirect(destino)
     movimientos_cerrados = 0
-    
     ahora_mx = obtener_fecha_hora_mx().strftime('%Y-%m-%d %H:%M:%S')
-
     for ruta in rutas_activas:
         id_mov = str(ruta['id_movimiento'])
         llenos_raw = request.form.get(f'regreso_llenos_{id_mov}') or request.form.get('regreso_llenos')
