@@ -213,9 +213,23 @@ def registrar_gasto():
     if monto <= 0:
         flash("❌ Error: El monto del gasto debe ser mayor a 0.", "error")
         return redirect(url_for('inventario_dashboard'))
-    fecha = request.form.get('fecha')
+    LIMITE_MAXIMO_GASTO = 10000.0
+    if monto > LIMITE_MAXIMO_GASTO:
+        flash(f"❌ Error: No se permiten gastos superiores a ${LIMITE_MAXIMO_GASTO:,.2f}.", "error")
+        return redirect(url_for('inventario_dashboard'))
     conexion = obtener_conexion()
-    cursor = conexion.cursor()
+    cursor = conexion.cursor(dictionary=True)
+    cursor.execute("SELECT IFNULL(SUM(ganancia), 0) AS total_ing FROM Movimiento WHERE estado_bucle = 'Terminado'")
+    ingresos_totales = cursor.fetchone()['total_ing']
+    cursor.execute("SELECT IFNULL(SUM(monto), 0) AS total_egr FROM Gastos")
+    egresos_totales = cursor.fetchone()['total_egr']
+    caja_real = ingresos_totales - egresos_totales
+    if monto > caja_real:
+        cursor.close()
+        conexion.close()
+        flash(f"❌ Error: El gasto de ${monto:,.2f} supera el saldo disponible en caja real (${caja_real:,.2f}).", "error")
+        return redirect(url_for('inventario_dashboard'))
+    fecha = request.form.get('fecha')
     cursor.execute("INSERT INTO Gastos (concepto, monto, fecha, id_usuario_fk) VALUES (%s, %s, %s, %s)",
                    (concepto, monto, fecha, session['id_usuario']))
     conexion.commit()
