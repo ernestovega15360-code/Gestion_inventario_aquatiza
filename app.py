@@ -59,7 +59,7 @@ def login_procesar():
             else:
                 return redirect(url_for('control_rutas_empleado'))
         else:
-            return render_template('login.html', mensaje_error="Usuario o contraseña incorrectos.")
+            return render_template('login.html', mensaje_error="Usuario o contraseña incorrectos (también puede deberse a dejar espacios al final).")
     except mysql.connector.Error as e:
         return render_template('login.html', mensaje_error=f"Error: {e}")
     finally:
