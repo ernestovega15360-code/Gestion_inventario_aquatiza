@@ -592,7 +592,7 @@
                                                 <input type="password" id="input-pass-{{ u.id_usuario }}" name="nueva_password" placeholder="Nueva clave" class="form-control" style="padding: 3px 8px; font-size: 0.85rem; width: 120px;" aria-labelledby="lbl-pass-{{ u.id_usuario }}" required>
                                                 <button type="submit" class="btn-action btn-save" style="padding: 3px 8px; font-size: 0.8rem;">🔑</button>
                                             </form>
-                                            <form action="{{ url_for('eliminar_usuario') }}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Seguro que deseas eliminar este usuario? Solo se podrá si no tiene rutas registradas.'); mostrarCargaGlobal();">
+                                            <form action="{{ url_for('eliminar_usuario') }}" method="POST" style="margin: 0;" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Seguro que deseas eliminar este usuario? Solo se podrá si no tiene rutas registradas.', 'Eliminando usuario', '🗑️ Eliminando registro del sistema...');">
                                                 <input type="hidden" name="id_usuario" value="{{ u.id_usuario }}">
                                                 <button type="submit" class="btn-action" style="padding: 3px 8px; font-size: 0.8rem; background-color: #c62828; color: white; border: none;" title="Eliminar Usuario">🗑️</button>
                                             </form>
@@ -692,7 +692,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <form action="{{ url_for('eliminar_ruta') }}" method="POST" onsubmit="return confirm('¿Eliminar este registro de ruta?'); mostrarCargaGlobal();">
+                                    <form action="{{ url_for('eliminar_ruta') }}" method="POST" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Estás seguro de eliminar este registro de ruta?', 'Eliminando ruta', '🗑️ Borrando registro de ruta...');">
                                         <input type="hidden" name="id_movimiento" value="{{ r.id_movimiento }}">
                                         <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar Registro">🗑️</button>
                                     </form>
@@ -791,7 +791,8 @@
 
         let temporizadorEnvio = null;
         let cuentaRegresiva = null;
-        function procesarEnvioConDeshacer(formulario, mensajeConfirmacion) {
+
+        function procesarEnvioConDeshacer(formulario, mensajeConfirmacion, textoAccion = "Guardando cambios", textoFinalizando = "⏳ Subiendo registro...") {
             if (mensajeConfirmacion && !confirm(mensajeConfirmacion)) {
                 return false;
             }
@@ -815,21 +816,21 @@
             toast.style.fontSize = '0.95rem';
             let segundosRestantes = 5;
             toast.innerHTML = `
-                <span id="txt-cuenta-regresiva">Guardando cambios en ${segundosRestantes}s...</span>
+                <span id="txt-cuenta-regresiva">${textoAccion} en ${segundosRestantes}s...</span>
                 <button id="btn-undo-action" style="background-color: var(--azul-brillante); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: 'Montserrat', system-ui, sans-serif;">DESHACER</button>
             `;
             document.body.appendChild(toast);
             
             temporizadorEnvio = setTimeout(() => {
-                toast.innerHTML = '<span>⏳ Subiendo registro...</span>';
-                setTimeout(() => { formulario.submit(); }, 400);
+                toast.innerHTML = `<span>${textoFinalizando}</span>`;
+                setTimeout(() => { formulario.submit(); }, 400); 
             }, 5000);
             
             cuentaRegresiva = setInterval(() => {
                 segundosRestantes--;
                 const txtCuenta = toast.querySelector('#txt-cuenta-regresiva');
                 if (segundosRestantes > 0 && txtCuenta) {
-                    txtCuenta.innerText = `Guardando cambios en ${segundosRestantes}s...`;
+                    txtCuenta.innerText = `${textoAccion} en ${segundosRestantes}s...`;
                 } else {
                     clearInterval(cuentaRegresiva);
                 }
@@ -847,7 +848,7 @@
                 if(edSellos) edSellos.disabled = true;
                 const saveBtn = document.getElementById('save-stock-btn');
                 if(saveBtn) saveBtn.disabled = true;
-                alert('Acción deshecha con éxito. Los datos no se guardaron.');
+                alert('Acción deshecha con éxito. Los datos no se modificaron.');
             });
         }
         
