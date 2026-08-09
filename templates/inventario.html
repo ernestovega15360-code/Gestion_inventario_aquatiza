@@ -23,10 +23,6 @@
         *, *::before, *::after {
             box-sizing: border-box;
         }
-        html, body {
-            max-width: 100%;
-            overflow-x: hidden; /* Evita que el body genere scroll horizontal y corte la barra azul */
-        }
         body {
             font-family: 'Open Sans', system-ui, -apple-system, blinkmacsystemfont, sans-serif;
             background-color: var(--gris-suave);
@@ -35,20 +31,18 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            width: 100%;
         }
-        /* BARRA AZUL SUPERIOR CORREGIDA */
+        /* ENCABEZADO AZUL PERFECTO Y FLUIDO */
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 12px 24px;
             background-color: var(--azul-brillante);
-            position: sticky; /* Se mantiene fija arriba */
-            top: 0;
-            left: 0;
             width: 100%;
-            z-index: 1000;
             min-height: 74px;
+            position: relative;
         }
         .logo-aquatiza {
             width: 130px;
@@ -90,11 +84,13 @@
             border: 1px solid var(--azul-borde);
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1001;
+            z-index: 1000;
             width: 260px;
             padding: 15px;
             color: var(--gris-texto);
             text-align: left;
+            max-height: 250px;
+            overflow-y: auto;
         }
         .user-dropdown-menu.active {
             display: block;
@@ -128,6 +124,7 @@
             justify-content: center;
             gap: 15px;
             padding: 20px 20px 10px 20px;
+            width: 100%;
         }
         .btn-nav {
             font-family: 'Montserrat', system-ui, sans-serif;
@@ -150,7 +147,6 @@
         main {
             flex: 1 0 auto;
             width: 100%;
-            overflow-x: hidden;
         }
         .tab-content {
             display: none;
@@ -163,11 +159,18 @@
         .tab-content.active {
             display: block;
         }
+        
+        /* GRID DE PANELES ADAPTABLE */
         .main-dashboard {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            width: 100%;
         }
+        .main-dashboard > div {
+            min-width: 0; /* Evita que los elementos hijos rompan el ancho del grid */
+        }
+
         .data-card {
             background-color: var(--blanco-puro);
             border: 1px solid var(--azul-borde);
@@ -175,7 +178,7 @@
             padding: 24px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             margin-bottom: 20px;
-            min-height: 150px;
+            width: 100%;
         }
         h2 {
             font-family: 'Montserrat', system-ui, sans-serif;
@@ -191,7 +194,7 @@
             border-collapse: collapse;
         }
         .table-stock th, .table-stock td {
-            padding: 14px;
+            padding: 12px;
             text-align: left;
             border-bottom: 1px solid var(--azul-borde);
         }
@@ -259,19 +262,24 @@
             color: var(--negro-absoluto);
             font-weight: 700;
         }
+        
+        /* FORMULARIOS CORREGIDOS PARA QUE NO SE DESPORDEN */
         .form-inline {
             display: flex;
             gap: 10px;
             align-items: center;
             margin-bottom: 15px;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Permite acomodar elementos si el espacio es reducido */
+            width: 100%;
         }
         .form-control {
             padding: 10px;
             border: 1.5px solid var(--azul-borde);
             border-radius: 6px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--gris-texto);
+            flex: 1 1 140px; /* Ajuste elástico seguro */
+            min-width: 0;
         }
         .input-ruta {
             border: 1.5px solid var(--azul-borde);
@@ -279,10 +287,6 @@
             font-weight: 600;
             color: #0056b3;
             text-align: center;
-        }
-        .input-ruta:focus, .select-ruta:focus {
-            border-color: var(--azul-brillante);
-            outline: none;
         }
         .select-ruta {
             border: 1.5px solid var(--azul-borde);
@@ -299,6 +303,7 @@
             margin-top: auto;
             background-color: transparent;
             min-height: 60px;
+            width: 100%;
         }
         .eslogan-box {
             font-family: 'Montserrat', system-ui, sans-serif;
@@ -335,17 +340,15 @@
         .flash-success { background-color: var(--verde-esmeralda); }
         .flash-error { background-color: #c62828; }
 
-        /* CONTENEDORES DE TABLAS CON SCROLL INTERNO (EVITA CORTAR ENCABEZADO) */
+        /* TABLAS INTERNAS SCROLLABLES */
         .tabla-deslizable {
             width: 100%;
-            max-width: 100%;
-            max-height: 500px;
+            max-height: 400px;
             overflow-y: auto;
-            overflow-x: auto; /* Scroll horizontal solo dentro de la tabla */
+            overflow-x: auto;
             border: 1px solid var(--azul-borde);
             border-radius: 12px;
             margin-top: 15px;
-            -webkit-overflow-scrolling: touch;
         }
         .tabla-deslizable table thead th {
             position: sticky;
@@ -354,10 +357,6 @@
         }
 
         @media (max-width: 768px) {
-            .header-top {
-                flex-direction: row; /* Mantiene la barra alineada en una sola fila compacta */
-                padding: 10px 16px;
-            }
             .nav-modules {
                 flex-wrap: wrap;
                 gap: 10px;
@@ -366,10 +365,6 @@
                 flex: 1 1 calc(50% - 10px);
                 padding: 10px;
                 font-size: 0.9rem;
-            }
-            .main-dashboard {
-                grid-template-columns: 1fr;
-                gap: 20px;
             }
             .footer-dashboard {
                 flex-direction: column;
@@ -421,38 +416,36 @@
                     <h2>Estado del stock actual</h2>
                     <div class="data-card">
                         <form id="form-inventario" action="{{ url_for('guardar_inventario') }}" method="POST">
-                            <div class="tabla-deslizable" style="border: none;">
-                                <table class="table-stock">
-                                    <thead>
-                                        <tr>
-                                            <th>Producto</th>
-                                            <th>Stock</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Garrafón (20L)</td>
-                                            <td><input type="number" class="input-stock" id="ed_g20" name="stock_garrafon_20" value="{{ inv.stock_garrafon_20 }}" min="0" max="1000" aria-label="Stock Garrafón 20L" disabled></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Garrafón (5L)</td>
-                                            <td><input type="number" class="input-stock" id="ed_g5" name="stock_garrafon_5" value="{{ inv.stock_garrafon_5 }}" min="0" max="1000" aria-label="Stock Garrafón 5L" disabled></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Tapas</td>
-                                            <td><input type="number" class="input-stock" id="ed_tapas" name="stock_tapas" value="{{ inv.stock_tapas }}" min="0" max="1000" aria-label="Stock Tapas" disabled></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Sellos térmicos</td>
-                                            <td><input type="number" class="input-stock" id="ed_sellos" name="stock_sellos" value="{{ inv.stock_sellos }}" min="0" max="1000" aria-label="Stock Sellos térmicos" disabled></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Mermas detectadas</td>
-                                            <td><input type="number" class="input-stock" value="{{ inv.stock_mermas }}" min="0" aria-label="Mermas detectadas" disabled></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <table class="table-stock">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Garrafón (20L)</td>
+                                        <td><input type="number" class="input-stock" id="ed_g20" name="stock_garrafon_20" value="{{ inv.stock_garrafon_20 }}" min="0" max="1000" aria-label="Stock Garrafón 20L" disabled></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Garrafón (5L)</td>
+                                        <td><input type="number" class="input-stock" id="ed_g5" name="stock_garrafon_5" value="{{ inv.stock_garrafon_5 }}" min="0" max="1000" aria-label="Stock Garrafón 5L" disabled></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tapas</td>
+                                        <td><input type="number" class="input-stock" id="ed_tapas" name="stock_tapas" value="{{ inv.stock_tapas }}" min="0" max="1000" aria-label="Stock Tapas" disabled></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sellos térmicos</td>
+                                        <td><input type="number" class="input-stock" id="ed_sellos" name="stock_sellos" value="{{ inv.stock_sellos }}" min="0" max="1000" aria-label="Stock Sellos térmicos" disabled></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mermas detectadas</td>
+                                        <td><input type="number" class="input-stock" value="{{ inv.stock_mermas }}" min="0" aria-label="Mermas detectadas" disabled></td>
+                                    </tr>
+                                </tbody>
+                            </table>
                             <div style="margin-top: 20px; display: flex; gap: 10px;">
                                 <button type="button" class="btn-action btn-save" onclick="permitirEdicion()">+ Editar catálogo</button>
                                 <button type="button" class="btn-action btn-save" id="save-stock-btn" onclick="confirmarGuardado()" disabled>💾 Guardar</button>
@@ -490,6 +483,8 @@
                 </div>
             </div>
         </div>
+        
+        <!-- PESTAÑA GESTIÓN DE EMPRESA ADAPTADA Y COMPLETA -->
         <div class="tab-content" id="tab-finanzas">
             <div class="main-dashboard">
                 <div>
@@ -553,8 +548,7 @@
                     <h2>Registrar Gastos</h2>
                     <div class="data-card">
                         <form action="{{ url_for('registrar_gasto') }}" method="POST" class="form-inline" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Estás seguro de registrar este gasto? Se descontará del balance.');">
-                            <label id="lbl-concepto" for="select-concepto" style="display:none;">Concepto</label>
-                            <select id="select-concepto" name="concepto" class="form-control" aria-labelledby="lbl-concepto" required>
+                            <select id="select-concepto" name="concepto" class="form-control" required>
                                 <option value="">-- Seleccionar Concepto --</option>
                                 <option value="Renta">Renta</option>
                                 <option value="Sueldo">Sueldo</option>
@@ -564,10 +558,8 @@
                                 <option value="Gasolina">Gasolina</option>
                                 <option value="Pipa de agua">Pipa de agua</option>
                             </select>
-                            <label id="lbl-monto" for="input-monto" style="display:none;">Monto</label>
-                            <input type="number" id="input-monto" name="monto" class="form-control" step="0.01" placeholder="Monto $" aria-labelledby="lbl-monto" required>
-                            <label id="lbl-fecha-gasto" for="input-fecha-gasto" style="display:none;">Fecha</label>
-                            <input type="date" id="input-fecha-gasto" name="fecha" class="form-control" aria-labelledby="lbl-fecha-gasto" required>
+                            <input type="number" id="input-monto" name="monto" class="form-control" step="0.01" placeholder="Monto $" required>
+                            <input type="date" id="input-fecha-gasto" name="fecha" class="form-control" required>
                             <button type="submit" class="btn-action btn-save">💾 Guardar Gasto</button>
                         </form>
                     </div>
@@ -575,12 +567,9 @@
                     <div class="data-card">
                         <form action="{{ url_for('gestion_usuario') }}" method="POST" class="form-inline" style="margin-bottom:20px;" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Estás seguro de registrar este nuevo usuario en el sistema?');">
                             <input type="hidden" name="accion" value="agregar">
-                            <label id="lbl-usuario" for="input-usuario" style="display:none;">Usuario</label>
-                            <input type="text" id="input-usuario" name="usuario" placeholder="Usuario" class="form-control" aria-labelledby="lbl-usuario" required>
-                            <label id="lbl-password" for="input-password" style="display:none;">Contraseña</label>
-                            <input type="text" id="input-password" name="password" placeholder="Contraseña" class="form-control" aria-labelledby="lbl-password" required>
-                            <label id="lbl-rol" for="select-rol" style="display:none;">Rol</label>
-                            <select id="select-rol" name="rol" class="form-control" aria-labelledby="lbl-rol" required>
+                            <input type="text" id="input-usuario" name="usuario" placeholder="Usuario" class="form-control" required>
+                            <input type="text" id="input-password" name="password" placeholder="Contraseña" class="form-control" required>
+                            <select id="select-rol" name="rol" class="form-control" required>
                                 <option value="Empleado">Empleado</option>
                                 <option value="Dueño">Dueño</option>
                             </select>
@@ -590,10 +579,10 @@
                             <table class="table-stock">
                                 <thead class="blue-bg">
                                     <tr>
-                                        <th>usuario</th>
-                                        <th>rol</th>
-                                        <th>estado</th>
-                                        <th>acciones</th>
+                                        <th>Usuario</th>
+                                        <th>Rol</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -602,12 +591,11 @@
                                         <td>{{ u.nom_usuario }}</td>
                                         <td>{{ u.rol }}</td>
                                         <td><span style="color: var(--verde-esmeralda); font-weight: 600;">activo</span></td>
-                                        <td style="display: flex; gap: 5px; align-items: center;">
+                                        <td style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap;">
                                             <form action="{{ url_for('gestion_usuario') }}" method="POST" style="display: flex; gap: 5px; align-items: center; margin: 0;">
                                                 <input type="hidden" name="accion" value="cambiar_pass">
                                                 <input type="hidden" name="id_usuario" value="{{ u.id_usuario }}">
-                                                <label id="lbl-pass-{{ u.id_usuario }}" for="input-pass-{{ u.id_usuario }}" style="display:none;">Nueva Clave</label>
-                                                <input type="password" id="input-pass-{{ u.id_usuario }}" name="nueva_password" placeholder="Nueva clave" class="form-control" style="padding: 3px 8px; font-size: 0.85rem; width: 120px;" aria-labelledby="lbl-pass-{{ u.id_usuario }}" required>
+                                                <input type="password" id="input-pass-{{ u.id_usuario }}" name="nueva_password" placeholder="Nueva clave" class="form-control" style="padding: 3px 8px; font-size: 0.85rem; width: 100px;" required>
                                                 <button type="submit" class="btn-action btn-save" style="padding: 3px 8px; font-size: 0.8rem;">🔑</button>
                                             </form>
                                             <form action="{{ url_for('eliminar_usuario') }}" method="POST" style="margin: 0;" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Seguro que deseas eliminar este usuario? Solo se podrá si no tiene rutas registradas.', 'Eliminando usuario', '🗑️ Eliminando registro del sistema...');">
@@ -624,19 +612,19 @@
                 </div>
             </div>
         </div>
+
         <div class="tab-content" id="tab-rutas">
             <h2>Registrar mis rutas</h2>
             <div class="data-card">
                 {% if not rutas_activas %}
                     <form action="{{ url_for('ruta_salida') }}" method="POST" class="form-inline" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Confirmas la salida de ruta con las cantidades seleccionadas?');">
-                        <label id="lbl-cant20" for="input-cant20" style="font-weight: 600; color: var(--gris-texto);">Garrafón 20L:</label>
-                        <input type="number" id="input-cant20" name="cantidad_20" class="form-control input-ruta" min="0" value="0" required style="width: 80px;" aria-labelledby="lbl-cant20">
+                        <label style="font-weight: 600; color: var(--gris-texto);">Garrafón 20L:</label>
+                        <input type="number" id="input-cant20" name="cantidad_20" class="form-control input-ruta" min="0" value="0" required style="width: 80px;">
                         
-                        <label id="lbl-cant5" for="input-cant5" style="font-weight: 600; color: var(--gris-texto);">Garrafón 5L:</label>
-                        <input type="number" id="input-cant5" name="cantidad_5" class="form-control input-ruta" min="0" value="0" required style="width: 80px;" aria-labelledby="lbl-cant5">
+                        <label style="font-weight: 600; color: var(--gris-texto);">Garrafón 5L:</label>
+                        <input type="number" id="input-cant5" name="cantidad_5" class="form-control input-ruta" min="0" value="0" required style="width: 80px;">
                         
-                        <label id="lbl-tipo-entrega" for="select-tipo-entrega" style="display:none;">Tipo Entrega</label>
-                        <select id="select-tipo-entrega" name="tipo_entrega" class="form-control select-ruta" aria-labelledby="lbl-tipo-entrega" required>
+                        <select id="select-tipo-entrega" name="tipo_entrega" class="form-control select-ruta" required>
                             <option value="Entrega Normal">Entrega Normal</option>
                             <option value="A Casa">A Casa</option>
                             <option value="A Negocio">A Negocio</option>
@@ -650,17 +638,17 @@
                                 🛑 Ruta Activa (ID: {{ r.id_movimiento }}): Llevas <strong>{{ r.g_salidas }} pzs</strong> de {{ r.tipo_garrafon }}.
                             </div>
                             <div class="form-inline" style="background: #F8F9FA; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--azul-borde);">
-                                <label id="lbl-llenos-{{ r.id_movimiento }}" for="input-llenos-{{ r.id_movimiento }}" style="font-weight: 600;">Llega Llenos:</label>
-                                <input type="number" id="input-llenos-{{ r.id_movimiento }}" name="regreso_llenos_{{ r.id_movimiento }}" class="form-control input-ruta" min="0" value="0" required style="width: 70px;" aria-labelledby="lbl-llenos-{{ r.id_movimiento }}">
+                                <label style="font-weight: 600;">Llega Llenos:</label>
+                                <input type="number" name="regreso_llenos_{{ r.id_movimiento }}" class="form-control input-ruta" min="0" value="0" required style="width: 70px;">
                                 
-                                <label id="lbl-vacios-{{ r.id_movimiento }}" for="input-vacios-{{ r.id_movimiento }}" style="font-weight: 600;">Llega Vacíos:</label>
-                                <input type="number" id="input-vacios-{{ r.id_movimiento }}" name="regreso_vacios_{{ r.id_movimiento }}" class="form-control input-ruta" min="0" value="0" required style="width: 70px;" aria-labelledby="lbl-vacios-{{ r.id_movimiento }}">
+                                <label style="font-weight: 600;">Llega Vacíos:</label>
+                                <input type="number" name="regreso_vacios_{{ r.id_movimiento }}" class="form-control input-ruta" min="0" value="0" required style="width: 70px;">
                                 
-                                <label id="lbl-envases-{{ r.id_movimiento }}" for="input-envases-{{ r.id_movimiento }}" style="font-weight: 600;">Vendió Envase:</label>
-                                <input type="number" id="input-envases-{{ r.id_movimiento }}" name="envases_vendidos_{{ r.id_movimiento }}" class="form-control input-ruta" min="0" value="0" required style="width: 70px;" aria-labelledby="lbl-envases-{{ r.id_movimiento }}">
+                                <label style="font-weight: 600;">Vendió Envase:</label>
+                                <input type="number" name="envases_vendidos_{{ r.id_movimiento }}" class="form-control input-ruta" min="0" value="0" required style="width: 70px;">
                                 
-                                <label id="lbl-mermas-{{ r.id_movimiento }}" for="input-mermas-{{ r.id_movimiento }}" style="font-weight: 600;">Mermas:</label>
-                                <input type="number" id="input-mermas-{{ r.id_movimiento }}" name="mermas_{{ r.id_movimiento }}" class="form-control input-ruta" min="0" value="0" required style="width: 70px;" aria-labelledby="lbl-mermas-{{ r.id_movimiento }}">
+                                <label style="font-weight: 600;">Mermas:</label>
+                                <input type="number" name="mermas_{{ r.id_movimiento }}" class="form-control input-ruta" min="0" value="0" required style="width: 70px;">
                             </div>
                         {% endfor %}
                         <button type="submit" class="btn-action btn-save">🏁 Guardar Retorno(s)</button>
