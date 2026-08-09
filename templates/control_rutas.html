@@ -290,7 +290,7 @@
     </main>
     <footer class="footer-dashboard">
         <div class="eslogan-box">AGUA PURA, VIDA PURA</div>
-        <a href="/logout" class="btn-logout">🚪 Cerrar Sesión</a>
+        <a href="/logout" class="btn-logout" onclick="return confirm('¿Seguro que deseas cerrar sesión?');">🚪 Cerrar Sesión</a>
     </footer>
     <div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalMensaje">
         <div class="modal-box">
@@ -303,8 +303,8 @@
     </div>
 
     <div id="undoToast" class="undo-toast" role="status" aria-live="polite">
-        <span>⌛ Guardando en <strong id="undoCountdown">5</strong> segundos...</span>
-        <button class="btn-undo-toast" onclick="deshacerEnvio()">↩ Deshacer</button>
+        <span id="toast-text-content">⌛ Guardando en <strong id="undoCountdown">5</strong> segundos...</span>
+        <button class="btn-undo-toast" id="btnUndoCancel" onclick="deshacerEnvio()">↩ Deshacer</button>
     </div>
 
     <script>
@@ -336,20 +336,29 @@
             if (formPendiente) {
                 cerrarModal();
                 segundosRestantes = 5;
-                document.getElementById('undoCountdown').innerText = segundosRestantes;
+                document.getElementById('toast-text-content').innerHTML = '⌛ Guardando en <strong id="undoCountdown">5</strong> segundos...';
+                document.getElementById('btnUndoCancel').style.display = 'inline-block';
+                
                 const toast = document.getElementById('undoToast');
                 toast.style.display = 'flex';
                 const btnSubmit = formPendiente.querySelector('.btn-submit');
                 if(btnSubmit) btnSubmit.style.opacity = '0.5';
+                
                 intervaloCountdown = setInterval(function() {
                     segundosRestantes--;
-                    document.getElementById('undoCountdown').innerText = segundosRestantes;
+                    const cd = document.getElementById('undoCountdown');
+                    if(cd) cd.innerText = segundosRestantes;
                     if (segundosRestantes <= 0) {
                         clearInterval(intervaloCountdown);
                     }
                 }, 1000);
+                
                 timerEnvio = setTimeout(function() {
-                    formPendiente.submit();
+                    document.getElementById('toast-text-content').innerHTML = '⏳ Subiendo registro...';
+                    document.getElementById('btnUndoCancel').style.display = 'none';
+                    setTimeout(function() {
+                        formPendiente.submit();
+                    }, 400);
                 }, 5000);
             }
         });

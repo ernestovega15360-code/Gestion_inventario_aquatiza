@@ -1,6 +1,5 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash, Response
-from flask_compress import Compress
 from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 from datetime import datetime
@@ -31,7 +30,6 @@ def obtener_conexion():
             ssl_disabled=False
         )
     except mysql.connector.Error as error:
-        print(f"Error de conexión: {error}")
         return None
 
 @app.route('/')
@@ -42,8 +40,8 @@ def login_vista():
 def login_procesar():
     if request.method == 'GET':
         return redirect(url_for('login_vista'))
-    txt_usuario = request.form['input_usuario']
-    txt_password = request.form['input_password']
+    txt_usuario = request.form['input_usuario'].strip()
+    txt_password = request.form['input_password'].strip()
     conexion = obtener_conexion()
     if conexion is None:
         return render_template('login.html', mensaje_error="Error al conectar con la base de datos.")
@@ -283,6 +281,39 @@ def gestion_usuario():
     cursor.close()
     conexion.close()
     return redirect(url_for('inventario_dashboard'))
+
+@app.route('/eliminar_usuario', methods=['POST'])
+def eliminar_usuario():
+    if 'id_usuario' not in session: return redirect(url_for('login_vista'))
+    id_usuario_target = request.form.get('id_usuario')
+    conexion = obtener_conexion()
+    cursor = conexion.cursor(dictionary=True)
+    cursor.execute("SELECT COUNT(*) AS total FROM Movimiento WHERE id_usuario_fk = %s", (id_usuario_target,))
+    movs = cursor.fetchone()['total']
+    if movs > 0:
+        flash("❌ No se puede eliminar el usuario porque tiene registros asociados.", "error")
+    else:
+        cursor.execute("DELETE FROM Usuario WHERE id_usuario = %s", (id_usuario_target,))
+        conexion.commit()
+        flash("✅ Usuario eliminado correctamente.", "success")
+    cursor.close()
+    conexion.close()
+    return redirect(url_for('inventario_dashboard'))
+
+@app.route('/eliminar_ruta', methods=['POST'])
+def eliminar_ruta():
+    if 'id_usuario' not in session or session['rol'] not in ["dueño", "administrador"]:
+        return redirect(url_for('login_vista'))
+    id_mov = request.form.get('id_movimiento')
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("DELETE FROM Historial_mermas WHERE id_movimiento_fk = %s", (id_mov,))
+    cursor.execute("DELETE FROM Movimiento WHERE id_movimiento = %s", (id_mov,))
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+    flash("✅ Registro de ruta eliminado del historial.", "success")
+    return redirect(url_for('inventario_dashboard', tab='rutas'))
 
 @app.route('/ruta_salida', methods=['POST'])
 def ruta_salida():

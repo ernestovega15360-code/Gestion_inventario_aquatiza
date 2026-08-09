@@ -326,6 +326,7 @@
         .tabla-deslizable {
             max-height: 500px;
             overflow-y: auto;
+            overflow-x: auto;
             border: 1px solid var(--azul-borde);
             border-radius: 12px;
             margin-top: 15px;
@@ -476,14 +477,14 @@
                 <div>
                     <h2>Balance Financiero Histórico</h2>
                     <div class="data-card">
-                        <form action="{{ url_for('inventario_dashboard') }}" method="GET" class="form-inline">
+                        <form action="{{ url_for('inventario_dashboard') }}" method="GET" class="form-inline" onsubmit="mostrarCargaGlobal()">
                             <input type="hidden" name="tab" value="finanzas">
                             <label id="lbl-desde" for="input-desde">Desde:</label>
                             <input type="date" id="input-desde" name="desde" value="{{ desde }}" class="form-control" aria-labelledby="lbl-desde">
                             <label id="lbl-hasta" for="input-hasta">Hasta:</label>
                             <input type="date" id="input-hasta" name="hasta" value="{{ hasta }}" class="form-control" aria-labelledby="lbl-hasta">
                             <button type="submit" class="btn-action">Filtrar</button>
-                            <a href="{{ url_for('inventario_dashboard', tab='finanzas') }}" class="btn-action" style="text-decoration:none; padding:10px 15px;">Limpiar</a>
+                            <a href="{{ url_for('inventario_dashboard', tab='finanzas') }}" class="btn-action" style="text-decoration:none; padding:10px 15px;" onclick="mostrarCargaGlobal()">Limpiar</a>
                         </form>
                         <div style="margin-top: 20px;">
                             <div class="box-number">
@@ -505,20 +506,24 @@
                         {% if desde and hasta %}
                         <div style="margin-top: 20px; border-top: 1px solid var(--azul-borde); padding-top: 15px;">
                             <h4>Desglose de Ventas</h4>
-                            <table class="table-stock" style="font-size: 0.9rem;">
-                                <tr><td>Llenados 20L:</td><td>{{ desglose_ventas.llenados_20 }} pzs</td></tr>
-                                <tr><td>Llenados 5L:</td><td>{{ desglose_ventas.llenados_5 }} pzs</td></tr>
-                                <tr><td>Envases Nuevos Vendidos:</td><td>{{ desglose_ventas.total_envases }} pzs</td></tr>
-                                <tr><td style="color: #c62828; font-weight: 600;">Mermas Registradas:</td><td style="color: #c62828; font-weight: 700;">{{ desglose_ventas.total_mermas }} pzs</td></tr>
-                            </table>
+                            <div class="tabla-deslizable" style="margin-top: 0;">
+                                <table class="table-stock" style="font-size: 0.9rem;">
+                                    <tr><td>Llenados 20L:</td><td>{{ desglose_ventas.llenados_20 }} pzs</td></tr>
+                                    <tr><td>Llenados 5L:</td><td>{{ desglose_ventas.llenados_5 }} pzs</td></tr>
+                                    <tr><td>Envases Nuevos Vendidos:</td><td>{{ desglose_ventas.total_envases }} pzs</td></tr>
+                                    <tr><td style="color: #c62828; font-weight: 600;">Mermas Registradas:</td><td style="color: #c62828; font-weight: 700;">{{ desglose_ventas.total_mermas }} pzs</td></tr>
+                                </table>
+                            </div>
                             <h4 style="margin-top: 15px;">Gastos realizados</h4>
-                            <table class="table-stock" style="font-size: 0.9rem;">
-                                {% for gasto in gastos_agrupados %}
-                                <tr><td>{{ gasto.concepto }}:</td><td>$ {{ gasto.total_gasto }}</td></tr>
-                                {% else %}
-                                <tr><td colspan="2">No hay gastos en este periodo.</td></tr>
-                                {% endfor %}
-                            </table>
+                            <div class="tabla-deslizable" style="margin-top: 0;">
+                                <table class="table-stock" style="font-size: 0.9rem;">
+                                    {% for gasto in gastos_agrupados %}
+                                    <tr><td>{{ gasto.concepto }}:</td><td>$ {{ gasto.total_gasto }}</td></tr>
+                                    {% else %}
+                                    <tr><td colspan="2">No hay gastos en este periodo.</td></tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
                         </div>
                         <div style="margin-top: 15px; text-align: center;">
                             <a href="{{ url_for('descargar_reporte', desde=desde, hasta=hasta) }}" style="background-color: var(--verde-esmeralda); color: var(--blanco-puro); padding: 10px 15px; text-decoration: none; border-radius: 6px; display: block; font-weight: bold; font-family: 'Montserrat', system-ui, sans-serif;">📥 Descargar Reporte CSV</a>
@@ -570,7 +575,7 @@
                                         <th>usuario</th>
                                         <th>rol</th>
                                         <th>estado</th>
-                                        <th>cambiar contraseña</th>
+                                        <th>acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -579,13 +584,17 @@
                                         <td>{{ u.nom_usuario }}</td>
                                         <td>{{ u.rol }}</td>
                                         <td><span style="color: var(--verde-esmeralda); font-weight: 600;">activo</span></td>
-                                        <td>
-                                            <form action="{{ url_for('gestion_usuario') }}" method="POST" style="display: flex; gap: 5px; align-items: center;">
+                                        <td style="display: flex; gap: 5px; align-items: center;">
+                                            <form action="{{ url_for('gestion_usuario') }}" method="POST" style="display: flex; gap: 5px; align-items: center; margin: 0;">
                                                 <input type="hidden" name="accion" value="cambiar_pass">
                                                 <input type="hidden" name="id_usuario" value="{{ u.id_usuario }}">
                                                 <label id="lbl-pass-{{ u.id_usuario }}" for="input-pass-{{ u.id_usuario }}" style="display:none;">Nueva Clave</label>
                                                 <input type="password" id="input-pass-{{ u.id_usuario }}" name="nueva_password" placeholder="Nueva clave" class="form-control" style="padding: 3px 8px; font-size: 0.85rem; width: 120px;" aria-labelledby="lbl-pass-{{ u.id_usuario }}" required>
-                                                <button type="submit" class="btn-action btn-save" style="padding: 3px 8px; font-size: 0.8rem;">🔑 Actualizar</button>
+                                                <button type="submit" class="btn-action btn-save" style="padding: 3px 8px; font-size: 0.8rem;">🔑</button>
+                                            </form>
+                                            <form action="{{ url_for('eliminar_usuario') }}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Seguro que deseas eliminar este usuario? Solo se podrá si no tiene rutas registradas.'); mostrarCargaGlobal();">
+                                                <input type="hidden" name="id_usuario" value="{{ u.id_usuario }}">
+                                                <button type="submit" class="btn-action" style="padding: 3px 8px; font-size: 0.8rem; background-color: #c62828; color: white; border: none;" title="Eliminar Usuario">🗑️</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -656,6 +665,7 @@
                                 <th>Mermas</th>
                                 <th>Ganancia</th>
                                 <th>Estado</th>
+                                <th>Acción</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -680,6 +690,12 @@
                                             {{ r.estado_bucle }}
                                         </span>
                                     {% endif %}
+                                </td>
+                                <td>
+                                    <form action="{{ url_for('eliminar_ruta') }}" method="POST" onsubmit="return confirm('¿Eliminar este registro de ruta?'); mostrarCargaGlobal();">
+                                        <input type="hidden" name="id_movimiento" value="{{ r.id_movimiento }}">
+                                        <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar Registro">🗑️</button>
+                                    </form>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -753,6 +769,26 @@
                 procesarEnvioConDeshacer(document.getElementById('form-inventario'));
             }
         }
+
+        function mostrarCargaGlobal() {
+            const toast = document.createElement('div');
+            toast.id = 'loading-toast-global';
+            toast.style.position = 'fixed';
+            toast.style.bottom = '30px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.backgroundColor = '#1A1A1A';
+            toast.style.color = '#FFFFFF';
+            toast.style.padding = '14px 24px';
+            toast.style.borderRadius = '8px';
+            toast.style.boxShadow = '0 4px 16px rgba(0,0,0,0.3)';
+            toast.style.zIndex = '9999';
+            toast.style.fontFamily = "'Montserrat', system-ui, sans-serif";
+            toast.style.fontSize = '0.95rem';
+            toast.innerHTML = '<span>⏳ Procesando solicitud...</span>';
+            document.body.appendChild(toast);
+        }
+
         let temporizadorEnvio = null;
         let cuentaRegresiva = null;
         function procesarEnvioConDeshacer(formulario, mensajeConfirmacion) {
@@ -779,22 +815,26 @@
             toast.style.fontSize = '0.95rem';
             let segundosRestantes = 5;
             toast.innerHTML = `
-                <span>Guardando cambios en ${segundosRestantes}s...</span>
+                <span id="txt-cuenta-regresiva">Guardando cambios en ${segundosRestantes}s...</span>
                 <button id="btn-undo-action" style="background-color: var(--azul-brillante); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: 'Montserrat', system-ui, sans-serif;">DESHACER</button>
             `;
             document.body.appendChild(toast);
+            
             temporizadorEnvio = setTimeout(() => {
-                eliminarToastDeshacer(false);
-                formulario.submit();
+                toast.innerHTML = '<span>⏳ Subiendo registro...</span>';
+                setTimeout(() => { formulario.submit(); }, 400);
             }, 5000);
+            
             cuentaRegresiva = setInterval(() => {
                 segundosRestantes--;
-                if (segundosRestantes > 0) {
-                    toast.querySelector('span').innerText = `Guardando cambios en ${segundosRestantes}s...`;
+                const txtCuenta = toast.querySelector('#txt-cuenta-regresiva');
+                if (segundosRestantes > 0 && txtCuenta) {
+                    txtCuenta.innerText = `Guardando cambios en ${segundosRestantes}s...`;
                 } else {
                     clearInterval(cuentaRegresiva);
                 }
             }, 1000);
+            
             document.getElementById('btn-undo-action').addEventListener('click', function() {
                 eliminarToastDeshacer(true);
                 const edG20 = document.getElementById('ed_g20');
@@ -810,6 +850,7 @@
                 alert('Acción deshecha con éxito. Los datos no se guardaron.');
             });
         }
+        
         function eliminarToastDeshacer(cancelarEnvio) {
             const toastExistente = document.getElementById('whatsapp-undo-toast');
             if (toastExistente) {
