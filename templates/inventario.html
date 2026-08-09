@@ -23,6 +23,10 @@
         *, *::before, *::after {
             box-sizing: border-box;
         }
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+        }
         body {
             font-family: 'Open Sans', system-ui, -apple-system, blinkmacsystemfont, sans-serif;
             background-color: var(--gris-suave);
@@ -40,6 +44,7 @@
             background-color: var(--azul-brillante);
             position: relative;
             min-height: 74px;
+            width: 100%;
         }
         .logo-aquatiza {
             width: 130px;
@@ -119,6 +124,7 @@
             justify-content: center;
             gap: 15px;
             padding: 20px 20px 10px 20px;
+            width: 100%;
         }
         .btn-nav {
             font-family: 'Montserrat', system-ui, sans-serif;
@@ -140,6 +146,7 @@
         }
         main {
             flex: 1 0 auto;
+            width: 100%;
         }
         .tab-content {
             display: none;
@@ -156,6 +163,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
+            width: 100%;
         }
         .data-card {
             background-color: var(--blanco-puro);
@@ -165,6 +173,8 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             margin-bottom: 20px;
             min-height: 150px;
+            width: 100%;
+            overflow-x: hidden;
         }
         h2 {
             font-family: 'Montserrat', system-ui, sans-serif;
@@ -174,6 +184,7 @@
             margin-top: 0;
             margin-bottom: 20px;
             text-align: center;
+            word-wrap: break-word;
         }
         .table-stock {
             width: 100%;
@@ -254,6 +265,7 @@
             align-items: center;
             margin-bottom: 15px;
             flex-wrap: wrap;
+            width: 100%;
         }
         .form-control {
             padding: 10px;
@@ -261,6 +273,7 @@
             border-radius: 6px;
             font-size: 1rem;
             color: var(--gris-texto);
+            max-width: 100%;
         }
         .input-ruta {
             border: 1.5px solid var(--azul-borde);
@@ -288,6 +301,7 @@
             margin-top: auto;
             background-color: transparent;
             min-height: 60px;
+            width: 100%;
         }
         .eslogan-box {
             font-family: 'Montserrat', system-ui, sans-serif;
@@ -330,12 +344,15 @@
             border: 1px solid var(--azul-borde);
             border-radius: 12px;
             margin-top: 15px;
+            width: 100%;
         }
         .tabla-deslizable table thead th {
             position: sticky;
             top: 0;
             z-index: 1;
         }
+
+        /* Ajustes específicos para teléfonos moviles en la vista de Gestión de Empresa */
         @media (max-width: 768px) {
             .header-top {
                 flex-direction: column;
@@ -359,6 +376,26 @@
                 flex-direction: column;
                 gap: 15px;
                 text-align: center;
+            }
+            .tab-content {
+                padding: 10px;
+            }
+            .data-card {
+                padding: 15px;
+            }
+            .form-inline {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .form-inline .form-control, 
+            .form-inline .btn-action,
+            .form-inline select,
+            .form-inline input {
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+            .tabla-deslizable table {
+                min-width: 500px;
             }
         }
     </style>
@@ -435,7 +472,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                            <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
                                 <button type="button" class="btn-action btn-save" onclick="permitirEdicion()">+ Editar catálogo</button>
                                 <button type="button" class="btn-action btn-save" id="save-stock-btn" onclick="confirmarGuardado()" disabled>💾 Guardar</button>
                             </div>
@@ -484,7 +521,7 @@
                             <label id="lbl-hasta" for="input-hasta">Hasta:</label>
                             <input type="date" id="input-hasta" name="hasta" value="{{ hasta }}" class="form-control" aria-labelledby="lbl-hasta">
                             <button type="submit" class="btn-action">Filtrar</button>
-                            <a href="{{ url_for('inventario_dashboard', tab='finanzas') }}" class="btn-action" style="text-decoration:none; padding:10px 15px;" onclick="mostrarCargaGlobal()">Limpiar</a>
+                            <a href="{{ url_for('inventario_dashboard', tab='finanzas') }}" class="btn-action" style="text-decoration:none; padding:10px 15px; text-align: center;" onclick="mostrarCargaGlobal()">Limpiar</a>
                         </form>
                         <div style="margin-top: 20px;">
                             <div class="box-number">
@@ -584,18 +621,20 @@
                                         <td>{{ u.nom_usuario }}</td>
                                         <td>{{ u.rol }}</td>
                                         <td><span style="color: var(--verde-esmeralda); font-weight: 600;">activo</span></td>
-                                        <td style="display: flex; gap: 5px; align-items: center;">
-                                            <form action="{{ url_for('gestion_usuario') }}" method="POST" style="display: flex; gap: 5px; align-items: center; margin: 0;">
-                                                <input type="hidden" name="accion" value="cambiar_pass">
-                                                <input type="hidden" name="id_usuario" value="{{ u.id_usuario }}">
-                                                <label id="lbl-pass-{{ u.id_usuario }}" for="input-pass-{{ u.id_usuario }}" style="display:none;">Nueva Clave</label>
-                                                <input type="password" id="input-pass-{{ u.id_usuario }}" name="nueva_password" placeholder="Nueva clave" class="form-control" style="padding: 3px 8px; font-size: 0.85rem; width: 120px;" aria-labelledby="lbl-pass-{{ u.id_usuario }}" required>
-                                                <button type="submit" class="btn-action btn-save" style="padding: 3px 8px; font-size: 0.8rem;">🔑</button>
-                                            </form>
-                                            <form action="{{ url_for('eliminar_usuario') }}" method="POST" style="margin: 0;" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Seguro que deseas eliminar este usuario? Solo se podrá si no tiene rutas registradas.', 'Eliminando usuario', '🗑️ Eliminando registro del sistema...');">
-                                                <input type="hidden" name="id_usuario" value="{{ u.id_usuario }}">
-                                                <button type="submit" class="btn-action" style="padding: 3px 8px; font-size: 0.8rem; background-color: #c62828; color: white; border: none;" title="Eliminar Usuario">🗑️</button>
-                                            </form>
+                                        <td>
+                                            <div style="display: flex; gap: 5px; align-items: center; flex-wrap: nowrap;">
+                                                <form action="{{ url_for('gestion_usuario') }}" method="POST" style="display: flex; gap: 5px; align-items: center; margin: 0;">
+                                                    <input type="hidden" name="accion" value="cambiar_pass">
+                                                    <input type="hidden" name="id_usuario" value="{{ u.id_usuario }}">
+                                                    <label id="lbl-pass-{{ u.id_usuario }}" for="input-pass-{{ u.id_usuario }}" style="display:none;">Nueva Clave</label>
+                                                    <input type="password" id="input-pass-{{ u.id_usuario }}" name="nueva_password" placeholder="Nueva clave" class="form-control" style="padding: 3px 8px; font-size: 0.85rem; width: 100px;" aria-labelledby="lbl-pass-{{ u.id_usuario }}" required>
+                                                    <button type="submit" class="btn-action btn-save" style="padding: 3px 8px; font-size: 0.8rem;">🔑</button>
+                                                </form>
+                                                <form action="{{ url_for('eliminar_usuario') }}" method="POST" style="margin: 0;" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Seguro que deseas eliminar este usuario? Solo se podrá si no tiene rutas registradas.', 'Eliminando usuario', '🗑️ Eliminando registro del sistema...');">
+                                                    <input type="hidden" name="id_usuario" value="{{ u.id_usuario }}">
+                                                    <button type="submit" class="btn-action" style="padding: 3px 8px; font-size: 0.8rem; background-color: #c62828; color: white; border: none;" title="Eliminar Usuario">🗑️</button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                     {% endfor %}
