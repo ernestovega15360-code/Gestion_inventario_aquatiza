@@ -23,6 +23,10 @@
         *, *::before, *::after {
             box-sizing: border-box;
         }
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden; /* Evita que el body genere scroll horizontal y corte la barra azul */
+        }
         body {
             font-family: 'Open Sans', system-ui, -apple-system, blinkmacsystemfont, sans-serif;
             background-color: var(--gris-suave);
@@ -32,13 +36,18 @@
             flex-direction: column;
             min-height: 100vh;
         }
+        /* BARRA AZUL SUPERIOR CORREGIDA */
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 12px 24px;
             background-color: var(--azul-brillante);
-            position: relative;
+            position: sticky; /* Se mantiene fija arriba */
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
             min-height: 74px;
         }
         .logo-aquatiza {
@@ -81,29 +90,11 @@
             border: 1px solid var(--azul-borde);
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
+            z-index: 1001;
             width: 260px;
             padding: 15px;
             color: var(--gris-texto);
             text-align: left;
-            /* Scroll Vertical contenido dentro de la tarjeta del menú desplegable */
-            max-height: 250px;
-            overflow-y: auto;
-        }
-        /* Personalización de barra de scroll interna del menú */
-        .user-dropdown-menu::-webkit-scrollbar {
-            width: 6px;
-        }
-        .user-dropdown-menu::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-        .user-dropdown-menu::-webkit-scrollbar-thumb {
-            background: var(--azul-brillante);
-            border-radius: 4px;
-        }
-        .user-dropdown-menu::-webkit-scrollbar-thumb:hover {
-            background: #0056b3;
         }
         .user-dropdown-menu.active {
             display: block;
@@ -158,6 +149,8 @@
         }
         main {
             flex: 1 0 auto;
+            width: 100%;
+            overflow-x: hidden;
         }
         .tab-content {
             display: none;
@@ -341,24 +334,29 @@
         }
         .flash-success { background-color: var(--verde-esmeralda); }
         .flash-error { background-color: #c62828; }
+
+        /* CONTENEDORES DE TABLAS CON SCROLL INTERNO (EVITA CORTAR ENCABEZADO) */
         .tabla-deslizable {
+            width: 100%;
+            max-width: 100%;
             max-height: 500px;
             overflow-y: auto;
-            overflow-x: auto;
+            overflow-x: auto; /* Scroll horizontal solo dentro de la tabla */
             border: 1px solid var(--azul-borde);
             border-radius: 12px;
             margin-top: 15px;
+            -webkit-overflow-scrolling: touch;
         }
         .tabla-deslizable table thead th {
             position: sticky;
             top: 0;
             z-index: 1;
         }
+
         @media (max-width: 768px) {
             .header-top {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
+                flex-direction: row; /* Mantiene la barra alineada en una sola fila compacta */
+                padding: 10px 16px;
             }
             .nav-modules {
                 flex-wrap: wrap;
@@ -423,36 +421,38 @@
                     <h2>Estado del stock actual</h2>
                     <div class="data-card">
                         <form id="form-inventario" action="{{ url_for('guardar_inventario') }}" method="POST">
-                            <table class="table-stock">
-                                <thead>
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Stock</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Garrafón (20L)</td>
-                                        <td><input type="number" class="input-stock" id="ed_g20" name="stock_garrafon_20" value="{{ inv.stock_garrafon_20 }}" min="0" max="1000" aria-label="Stock Garrafón 20L" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Garrafón (5L)</td>
-                                        <td><input type="number" class="input-stock" id="ed_g5" name="stock_garrafon_5" value="{{ inv.stock_garrafon_5 }}" min="0" max="1000" aria-label="Stock Garrafón 5L" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tapas</td>
-                                        <td><input type="number" class="input-stock" id="ed_tapas" name="stock_tapas" value="{{ inv.stock_tapas }}" min="0" max="1000" aria-label="Stock Tapas" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Sellos térmicos</td>
-                                        <td><input type="number" class="input-stock" id="ed_sellos" name="stock_sellos" value="{{ inv.stock_sellos }}" min="0" max="1000" aria-label="Stock Sellos térmicos" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Mermas detectadas</td>
-                                        <td><input type="number" class="input-stock" value="{{ inv.stock_mermas }}" min="0" aria-label="Mermas detectadas" disabled></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="tabla-deslizable" style="border: none;">
+                                <table class="table-stock">
+                                    <thead>
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Stock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Garrafón (20L)</td>
+                                            <td><input type="number" class="input-stock" id="ed_g20" name="stock_garrafon_20" value="{{ inv.stock_garrafon_20 }}" min="0" max="1000" aria-label="Stock Garrafón 20L" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Garrafón (5L)</td>
+                                            <td><input type="number" class="input-stock" id="ed_g5" name="stock_garrafon_5" value="{{ inv.stock_garrafon_5 }}" min="0" max="1000" aria-label="Stock Garrafón 5L" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Tapas</td>
+                                            <td><input type="number" class="input-stock" id="ed_tapas" name="stock_tapas" value="{{ inv.stock_tapas }}" min="0" max="1000" aria-label="Stock Tapas" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Sellos térmicos</td>
+                                            <td><input type="number" class="input-stock" id="ed_sellos" name="stock_sellos" value="{{ inv.stock_sellos }}" min="0" max="1000" aria-label="Stock Sellos térmicos" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Mermas detectadas</td>
+                                            <td><input type="number" class="input-stock" value="{{ inv.stock_mermas }}" min="0" aria-label="Mermas detectadas" disabled></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                             <div style="margin-top: 20px; display: flex; gap: 10px;">
                                 <button type="button" class="btn-action btn-save" onclick="permitirEdicion()">+ Editar catálogo</button>
                                 <button type="button" class="btn-action btn-save" id="save-stock-btn" onclick="confirmarGuardado()" disabled>💾 Guardar</button>
@@ -669,57 +669,55 @@
             </div>
             <h2>Historial de registros</h2>
             <div class="tabla-deslizable">
-                <div class="data-card" style="overflow-x:auto; margin-bottom:0;">
-                    <table class="table-stock">
-                        <thead>
-                            <tr>
-                                <th>Fecha/Hora</th>
-                                <th>Operador</th>
-                                <th>Producto</th>
-                                <th>Llevó</th>
-                                <th>G. Vacíos</th>
-                                <th>G. Llenos</th>
-                                <th>Vendió Envase</th>
-                                <th>Mermas</th>
-                                <th>Ganancia</th>
-                                <th>Estado</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for r in historial_rutas %}
-                            <tr>
-                                <td>{{ r.fecha_hora }}</td>
-                                <td>{{ r.empleado }}</td>
-                                <td>{{ r.tipo_garrafon }}</td>
-                                <td><strong>{{ r.g_salidas }}</strong></td>
-                                <td>{{ r.g_regreso_vacios }}</td>
-                                <td>{{ r.g_regreso_llenos }}</td>
-                                <td>{{ r.g_envases_vendidos }}</td>
-                                <td style="color:#c62828; font-weight:600;">{{ r.mermas_ruta }}</td>
-                                <td style="color:var(--verde-esmeralda); font-weight:bold;">$ {{ r.ganancia }}</td>
-                                <td>
-                                    {% if r.estado_bucle == 'En Ruta' %}
-                                        <span style="padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:600; background:#FFF9C4; color:#E65100;">
-                                            {{ r.estado_bucle }}
-                                        </span>
-                                    {% else %}
-                                        <span style="padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:600; background:#C8E6C9; color:#1b5e20;">
-                                            {{ r.estado_bucle }}
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <form action="{{ url_for('eliminar_ruta') }}" method="POST" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Estás seguro de eliminar este registro de ruta?', 'Eliminando ruta', '🗑️ Borrando registro de ruta...');">
-                                        <input type="hidden" name="id_movimiento" value="{{ r.id_movimiento }}">
-                                        <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar Registro">🗑️</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>    
+                <table class="table-stock">
+                    <thead>
+                        <tr>
+                            <th>Fecha/Hora</th>
+                            <th>Operador</th>
+                            <th>Producto</th>
+                            <th>Llevó</th>
+                            <th>G. Vacíos</th>
+                            <th>G. Llenos</th>
+                            <th>Vendió Envase</th>
+                            <th>Mermas</th>
+                            <th>Ganancia</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in historial_rutas %}
+                        <tr>
+                            <td>{{ r.fecha_hora }}</td>
+                            <td>{{ r.empleado }}</td>
+                            <td>{{ r.tipo_garrafon }}</td>
+                            <td><strong>{{ r.g_salidas }}</strong></td>
+                            <td>{{ r.g_regreso_vacios }}</td>
+                            <td>{{ r.g_regreso_llenos }}</td>
+                            <td>{{ r.g_envases_vendidos }}</td>
+                            <td style="color:#c62828; font-weight:600;">{{ r.mermas_ruta }}</td>
+                            <td style="color:var(--verde-esmeralda); font-weight:bold;">$ {{ r.ganancia }}</td>
+                            <td>
+                                {% if r.estado_bucle == 'En Ruta' %}
+                                    <span style="padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:600; background:#FFF9C4; color:#E65100;">
+                                        {{ r.estado_bucle }}
+                                    </span>
+                                {% else %}
+                                    <span style="padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:600; background:#C8E6C9; color:#1b5e20;">
+                                        {{ r.estado_bucle }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="{{ url_for('eliminar_ruta') }}" method="POST" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Estás seguro de eliminar este registro de ruta?', 'Eliminando ruta', '🗑️ Borrando registro de ruta...');">
+                                    <input type="hidden" name="id_movimiento" value="{{ r.id_movimiento }}">
+                                    <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar Registro">🗑️</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>
