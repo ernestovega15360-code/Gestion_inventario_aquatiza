@@ -86,6 +86,24 @@
             padding: 15px;
             color: var(--gris-texto);
             text-align: left;
+            /* Scroll Vertical contenido dentro de la tarjeta del menú desplegable */
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        /* Personalización de barra de scroll interna del menú */
+        .user-dropdown-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+        .user-dropdown-menu::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .user-dropdown-menu::-webkit-scrollbar-thumb {
+            background: var(--azul-brillante);
+            border-radius: 4px;
+        }
+        .user-dropdown-menu::-webkit-scrollbar-thumb:hover {
+            background: #0056b3;
         }
         .user-dropdown-menu.active {
             display: block;
