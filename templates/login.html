@@ -205,21 +205,21 @@
                     <p>Inicia sesión para continuar</p>
                 </header>
                 {% if mensaje_error %}
-                    <div class="error-message" role="alert" aria-live="assertive">{{ mensaje_error }}</div>
+                    <div class="error-message" role="alert" aria-live="assertive">{{ mensaje_error | safe }}</div>
                 {% endif %}
                 <form id="loginForm" action="{{ url_for('login_procesar') }}" method="POST">
                     <div class="form-group">
                         <label for="usuario">Usuario</label>
                         <div class="input-container">
                             <i class="fa-solid fa-user" aria-hidden="true"></i>
-                            <input type="text" id="usuario" name="input_usuario" required placeholder="Ingresa tu usuario" autocomplete="username" oninput="this.value = this.value.trim()">
+                            <input type="text" id="usuario" name="input_usuario" required placeholder="Ingresa tu usuario" autocomplete="username">
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="password">Contraseña</label>
                         <div class="input-container">
                             <i class="fa-solid fa-lock" aria-hidden="true"></i>
-                            <input type="password" id="password" name="input_password" required placeholder="Ingresa tu contraseña" autocomplete="current-password" oninput="this.value = this.value.trim()">
+                            <input type="password" id="password" name="input_password" required placeholder="Ingresa tu contraseña" autocomplete="current-password">
                         </div>
                     </div>
                     
