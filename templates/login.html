@@ -205,7 +205,7 @@
                     <p>Inicia sesión para continuar</p>
                 </header>
                 {% if mensaje_error %}
-                    <div class="error-message" role="alert" aria-live="assertive">{{ mensaje_error | safe }}</div>
+                    <div class="error-message" role="alert" aria-live="assertive">{{ mensaje_error }}</div>
                 {% endif %}
                 <form id="loginForm" action="{{ url_for('login_procesar') }}" method="POST">
                     <div class="form-group">
