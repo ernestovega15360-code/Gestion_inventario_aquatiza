@@ -33,7 +33,6 @@
             min-height: 100vh;
             width: 100%;
         }
-        /* ENCABEZADO AZUL PERFECTO Y FLUIDO */
         .header-top {
             display: flex;
             justify-content: space-between;
@@ -159,8 +158,6 @@
         .tab-content.active {
             display: block;
         }
-        
-        /* GRID DE PANELES ADAPTABLE */
         .main-dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -168,9 +165,8 @@
             width: 100%;
         }
         .main-dashboard > div {
-            min-width: 0; /* Evita que los elementos hijos rompan el ancho del grid */
+            min-width: 0;
         }
-
         .data-card {
             background-color: var(--blanco-puro);
             border: 1px solid var(--azul-borde);
@@ -262,14 +258,12 @@
             color: var(--negro-absoluto);
             font-weight: 700;
         }
-        
-        /* FORMULARIOS CORREGIDOS PARA QUE NO SE DESPORDEN */
         .form-inline {
             display: flex;
             gap: 10px;
             align-items: center;
             margin-bottom: 15px;
-            flex-wrap: wrap; /* Permite acomodar elementos si el espacio es reducido */
+            flex-wrap: wrap;
             width: 100%;
         }
         .form-control {
@@ -278,7 +272,7 @@
             border-radius: 6px;
             font-size: 0.95rem;
             color: var(--gris-texto);
-            flex: 1 1 140px; /* Ajuste elástico seguro */
+            flex: 1 1 140px;
             min-width: 0;
         }
         .input-ruta {
@@ -340,10 +334,9 @@
         .flash-success { background-color: var(--verde-esmeralda); }
         .flash-error { background-color: #c62828; }
 
-        /* TABLAS INTERNAS SCROLLABLES */
         .tabla-deslizable {
             width: 100%;
-            max-height: 400px;
+            max-height: 300px;
             overflow-y: auto;
             overflow-x: auto;
             border: 1px solid var(--azul-borde);
@@ -484,7 +477,6 @@
             </div>
         </div>
         
-        <!-- PESTAÑA GESTIÓN DE EMPRESA ADAPTADA Y COMPLETA -->
         <div class="tab-content" id="tab-finanzas">
             <div class="main-dashboard">
                 <div>
@@ -519,7 +511,7 @@
                         {% if desde and hasta %}
                         <div style="margin-top: 20px; border-top: 1px solid var(--azul-borde); padding-top: 15px;">
                             <h4>Desglose de Ventas</h4>
-                            <div class="tabla-deslizable" style="margin-top: 0;">
+                            <div class="tabla-deslizable" style="margin-top: 0; max-height: 180px;">
                                 <table class="table-stock" style="font-size: 0.9rem;">
                                     <tr><td>Llenados 20L:</td><td>{{ desglose_ventas.llenados_20 }} pzs</td></tr>
                                     <tr><td>Llenados 5L:</td><td>{{ desglose_ventas.llenados_5 }} pzs</td></tr>
@@ -528,7 +520,7 @@
                                 </table>
                             </div>
                             <h4 style="margin-top: 15px;">Gastos realizados</h4>
-                            <div class="tabla-deslizable" style="margin-top: 0;">
+                            <div class="tabla-deslizable" style="margin-top: 0; max-height: 180px;">
                                 <table class="table-stock" style="font-size: 0.9rem;">
                                     {% for gasto in gastos_agrupados %}
                                     <tr><td>{{ gasto.concepto }}:</td><td>$ {{ gasto.total_gasto }}</td></tr>
@@ -562,6 +554,38 @@
                             <input type="date" id="input-fecha-gasto" name="fecha" class="form-control" required>
                             <button type="submit" class="btn-action btn-save">💾 Guardar Gasto</button>
                         </form>
+                        
+                        <!-- TABLA DE HISTORIAL DE GASTOS CON SCROLL Y OPCION DE BORRADO -->
+                        <h4 style="margin-top: 20px; margin-bottom: 10px;">Historial de Gastos Registrados</h4>
+                        <div class="tabla-deslizable" style="max-height: 200px;">
+                            <table class="table-stock" style="font-size: 0.9rem;">
+                                <thead class="blue-bg">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Concepto</th>
+                                        <th>Monto</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for g in historial_gastos %}
+                                    <tr>
+                                        <td>{{ g.fecha }}</td>
+                                        <td>{{ g.concepto }}</td>
+                                        <td style="color: #c62828; font-weight: 600;">-$ {{ g.monto }}</td>
+                                        <td>
+                                            <form action="{{ url_for('eliminar_gasto') }}" method="POST" style="margin: 0;" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Estás seguro de eliminar este gasto? El dinero volverá a reintegrarse a la caja.', 'Eliminando gasto', '🗑️ Borrando registro de gasto...');">
+                                                <input type="hidden" name="id_gasto" value="{{ g.id_gasto }}">
+                                                <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar Gasto">🗑️</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="4" style="text-align: center;">No hay gastos registrados.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <h2>Control de acceso y personal</h2>
                     <div class="data-card">
