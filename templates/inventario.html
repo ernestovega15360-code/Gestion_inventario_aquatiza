@@ -616,7 +616,8 @@
                                         <td>{{ u.rol }}</td>
                                         <td><span style="color: var(--verde-esmeralda); font-weight: 600;">activo</span></td>
                                         <td style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap;">
-                                            <form action="{{ url_for('gestion_usuario') }}" method="POST" style="display: flex; gap: 5px; align-items: center; margin: 0;">
+                                            <!-- FORMULARIO DE CAMBIO DE CONTRASEÑA ACTUALIZADO CON DESHACER Y ALERTAS DE CONFIRMACION -->
+                                            <form action="{{ url_for('gestion_usuario') }}" method="POST" style="display: flex; gap: 5px; align-items: center; margin: 0;" onsubmit="event.preventDefault(); procesarEnvioConDeshacer(this, '¿Estás seguro de guardar los cambios para esta contraseña?', 'Guardando nueva contraseña', '🔑 Guardando nueva contraseña...');">
                                                 <input type="hidden" name="accion" value="cambiar_pass">
                                                 <input type="hidden" name="id_usuario" value="{{ u.id_usuario }}">
                                                 <input type="password" id="input-pass-{{ u.id_usuario }}" name="nueva_password" placeholder="Nueva clave" class="form-control" style="padding: 3px 8px; font-size: 0.85rem; width: 100px;" required>
