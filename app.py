@@ -105,8 +105,6 @@ def inventario_dashboard():
     mermas_hoy = cursor.fetchone()['mermas']
     cursor.execute("SELECT id_usuario, nom_usuario, contraseña, rol FROM Usuario")
     lista_usuarios = cursor.fetchall()
-    
-    # Historial completo de gastos para la lista interactiva
     cursor.execute("SELECT id_gasto, concepto, monto, fecha FROM Gastos ORDER BY fecha DESC, id_gasto DESC")
     historial_gastos = cursor.fetchall()
 
@@ -252,14 +250,23 @@ def eliminar_gasto():
     id_gasto = request.form.get('id_gasto')
     conexion = obtener_conexion()
     cursor = conexion.cursor(dictionary=True)
-    cursor.execute("SELECT monto FROM Gastos WHERE id_gasto = %s", (id_gasto,))
+    
+    cursor.execute("SELECT monto, fecha FROM Gastos WHERE id_gasto = %s", (id_gasto,))
     gasto = cursor.fetchone()
+    
     if gasto:
+        fecha_gasto = gasto['fecha'].strftime('%Y-%m-%d') if hasattr(gasto['fecha'], 'strftime') else str(gasto['fecha'])
+        hoy_mx = obtener_fecha_hora_mx().strftime('%Y-%m-%d')
+        if fecha_gasto != hoy_mx:
+            cursor.close()
+            conexion.close()
+            flash("❌ Solo puedes eliminar gastos registrados durante el día de hoy.", "error")
+            return redirect(url_for('inventario_dashboard', tab='finanzas'))
         cursor.execute("DELETE FROM Gastos WHERE id_gasto = %s", (id_gasto,))
         conexion.commit()
         flash("✅ Gasto eliminado. El monto fue devuelto al balance de caja.", "success")
     else:
-        flash("❌ El gasto que intenta eliminar no existe.", "error")
+        flash("❌ El gasto que intenta eliminar no existe.", "error")  
     cursor.close()
     conexion.close()
     return redirect(url_for('inventario_dashboard', tab='finanzas'))
@@ -335,47 +342,41 @@ def eliminar_ruta():
     id_mov = request.form.get('id_movimiento')
     conexion = obtener_conexion()
     cursor = conexion.cursor(dictionary=True)
-    
-    # 1. Obtener datos de la ruta antes de borrar para hacer el rollback
     cursor.execute("SELECT * FROM Movimiento WHERE id_movimiento = %s", (id_mov,))
     mov = cursor.fetchone()
-    
     if mov:
+        fecha_ruta = mov['fecha_hora'].strftime('%Y-%m-%d') if hasattr(mov['fecha_hora'], 'strftime') else str(mov['fecha_hora'])[:10]
+        hoy_mx = obtener_fecha_hora_mx().strftime('%Y-%m-%d')
+
+        if fecha_ruta != hoy_mx:
+            cursor.close()
+            conexion.close()
+            flash("❌ Solo puedes eliminar rutas creadas durante el día de hoy.", "error")
+            return redirect(url_for('inventario_dashboard', tab='rutas'))
         id_inv = mov['id_inventario_fk']
         v_vacios = mov['g_regreso_vacios'] or 0
         v_envases = mov['g_envases_vendidos'] or 0
         v_salidas = mov['g_salidas'] or 0
-        
         cursor.execute("SELECT IFNULL(SUM(cant_mermas), 0) AS total_mermas FROM Historial_mermas WHERE id_movimiento_fk = %s", (id_mov,))
         mermas_ruta = cursor.fetchone()['total_mermas']
-        
         if mov['estado_bucle'] == 'Terminado':
-            # Restauración de stock de garrafones (regresan los envases vendidos + mermas)
             garrafones_a_devolver = v_envases + mermas_ruta
             if garrafones_a_devolver > 0:
                 cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE id_inventario = %s", (garrafones_a_devolver, id_inv))
-            
-            # Restauración de insumos invisibles (tapas y sellos que se consumieron en la venta)
             insumos_a_devolver = v_vacios + v_envases
             if insumos_a_devolver > 0:
-                cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE tipo_garrafon LIKE '%tapas%'", (insumos_a_devolver,))
-                cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE tipo_garrafon LIKE '%sellos%'", (insumos_a_devolver,))
-            
-            # Restar mermas globales generadas por esta ruta
+                cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE tipo_garrafon LIKE %s", (insumos_a_devolver, '%tapas%'))
+                cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE tipo_garrafon LIKE %s", (insumos_a_devolver, '%sellos%'))
             if mermas_ruta > 0:
-                cursor.execute("UPDATE Inventario SET cant_total = GREATEST(0, cant_total - %s) WHERE tipo_garrafon LIKE '%merma%'", (mermas_ruta,))
+                cursor.execute("UPDATE Inventario SET cant_total = GREATEST(0, cant_total - %s) WHERE tipo_garrafon LIKE %s", (mermas_ruta, '%merma%'))
         else:
-            # Si estaba 'En Ruta', simplemente se devuelven todos los garrafones que salieron
             cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE id_inventario = %s", (v_salidas, id_inv))
-
-        # 2. Proceder con el borrado físico
         cursor.execute("DELETE FROM Historial_mermas WHERE id_movimiento_fk = %s", (id_mov,))
         cursor.execute("DELETE FROM Movimiento WHERE id_movimiento = %s", (id_mov,))
         conexion.commit()
         flash("✅ Ruta eliminada. Stock, insumos y caja restablecidos al estado previo.", "success")
     else:
         flash("❌ La ruta no fue encontrada.", "error")
-        
     cursor.close()
     conexion.close()
     return redirect(url_for('inventario_dashboard', tab='rutas'))
@@ -502,15 +503,12 @@ def ruta_regreso():
         retorno_total = llenos + vacios
         if retorno_total > 0:
             cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE id_inventario = %s", (retorno_total, id_inv))
-        
-        # Descontar tapas y sellos invisibles según ventas totales de esta ruta (llenados + envases)
         insumos_usados = vacios + envases
         if insumos_usados > 0:
-            cursor.execute("UPDATE Inventario SET cant_total = GREATEST(0, cant_total - %s) WHERE tipo_garrafon LIKE '%tapas%'", (insumos_usados,))
-            cursor.execute("UPDATE Inventario SET cant_total = GREATEST(0, cant_total - %s) WHERE tipo_garrafon LIKE '%sellos%'", (insumos_usados,))
-            
+            cursor.execute("UPDATE Inventario SET cant_total = GREATEST(0, cant_total - %s) WHERE tipo_garrafon LIKE %s", (insumos_usados, '%tapas%'))
+            cursor.execute("UPDATE Inventario SET cant_total = GREATEST(0, cant_total - %s) WHERE tipo_garrafon LIKE %s", (insumos_usados, '%sellos%'))
         if mermas > 0:
-            cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE tipo_garrafon LIKE '%merma%'", (mermas,))
+            cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE tipo_garrafon LIKE %s", (mermas, '%merma%'))
             cursor.execute("INSERT INTO Historial_mermas (cant_mermas, tipo_mermas, fecha_hora, id_movimiento_fk) VALUES (%s, 'Mermas de Ruta', %s, %s)", (mermas, ahora_mx, id_mov))
         cursor.execute("""
             UPDATE Movimiento
