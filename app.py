@@ -359,18 +359,19 @@ def eliminar_ruta():
         v_salidas = mov['g_salidas'] or 0
         cursor.execute("SELECT IFNULL(SUM(cant_mermas), 0) AS total_mermas FROM Historial_mermas WHERE id_movimiento_fk = %s", (id_mov,))
         mermas_ruta = cursor.fetchone()['total_mermas']
+        ahora_mx = obtener_fecha_hora_mx().strftime('%Y-%m-%d %H:%M:%S')
         if mov['estado_bucle'] == 'Terminado':
             garrafones_a_devolver = v_envases + mermas_ruta
             if garrafones_a_devolver > 0:
-                cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE id_inventario = %s", (garrafones_a_devolver, id_inv))
+                cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s, u_actualizacion = %s WHERE id_inventario = %s", (garrafones_a_devolver, ahora_mx, id_inv))
             insumos_a_devolver = v_vacios + v_envases
             if insumos_a_devolver > 0:
-                cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE tipo_garrafon LIKE %s", (insumos_a_devolver, '%tapas%'))
-                cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE tipo_garrafon LIKE %s", (insumos_a_devolver, '%sellos%'))
+                cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s, u_actualizacion = %s WHERE tipo_garrafon LIKE %s", (insumos_a_devolver, ahora_mx, '%tapas%'))
+                cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s, u_actualizacion = %s WHERE tipo_garrafon LIKE %s", (insumos_a_devolver, ahora_mx, '%sellos%'))
             if mermas_ruta > 0:
-                cursor.execute("UPDATE Inventario SET cant_total = GREATEST(0, cant_total - %s) WHERE tipo_garrafon LIKE %s", (mermas_ruta, '%merma%'))
+                cursor.execute("UPDATE Inventario SET cant_total = GREATEST(0, cant_total - %s), u_actualizacion = %s WHERE tipo_garrafon LIKE %s", (mermas_ruta, ahora_mx, '%merma%'))
         else:
-            cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE id_inventario = %s", (v_salidas, id_inv))
+            cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s, u_actualizacion = %s WHERE id_inventario = %s", (v_salidas, ahora_mx, id_inv))
         cursor.execute("DELETE FROM Historial_mermas WHERE id_movimiento_fk = %s", (id_mov,))
         cursor.execute("DELETE FROM Movimiento WHERE id_movimiento = %s", (id_mov,))
         conexion.commit()
@@ -422,13 +423,13 @@ def ruta_salida():
             return redirect(destino_redireccion)
     ahora_mx = obtener_fecha_hora_mx().strftime('%Y-%m-%d %H:%M:%S')
     if cant_20 > 0:
-        cursor.execute("UPDATE Inventario SET cant_total = cant_total - %s WHERE id_inventario = %s", (cant_20, inv_20['id_inventario']))
+        cursor.execute("UPDATE Inventario SET cant_total = cant_total - %s, u_actualizacion = %s WHERE id_inventario = %s", (cant_20, ahora_mx, inv_20['id_inventario']))
         cursor.execute("""
             INSERT INTO Movimiento (g_salidas, g_regreso_vacios, g_regreso_llenos, g_envases_vendidos, ganancia, tipo_movimiento, fecha_hora, id_usuario_fk, id_inventario_fk, estado_bucle)
             VALUES (%s, 0, 0, 0, 0.00, %s, %s, %s, %s, 'En Ruta')
         """, (cant_20, tipo_mov, ahora_mx, id_usuario, inv_20['id_inventario']))
     if cant_5 > 0:
-        cursor.execute("UPDATE Inventario SET cant_total = cant_total - %s WHERE id_inventario = %s", (cant_5, inv_5['id_inventario']))
+        cursor.execute("UPDATE Inventario SET cant_total = cant_total - %s, u_actualizacion = %s WHERE id_inventario = %s", (cant_5, ahora_mx, inv_5['id_inventario']))
         cursor.execute("""
             INSERT INTO Movimiento (g_salidas, g_regreso_vacios, g_regreso_llenos, g_envases_vendidos, ganancia, tipo_movimiento, fecha_hora, id_usuario_fk, id_inventario_fk, estado_bucle)
             VALUES (%s, 0, 0, 0, 0.00, %s, %s, %s, %s, 'En Ruta')
@@ -502,13 +503,15 @@ def ruta_regreso():
         ganancia = (vacios * p_llenado) + (envases * p_envase)
         retorno_total = llenos + vacios
         if retorno_total > 0:
-            cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE id_inventario = %s", (retorno_total, id_inv))
+            cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s, u_actualizacion = %s WHERE id_inventario = %s", (retorno_total, ahora_mx, id_inv))
+        else:
+            cursor.execute("UPDATE Inventario SET u_actualizacion = %s WHERE id_inventario = %s", (ahora_mx, id_inv))
         insumos_usados = vacios + envases
         if insumos_usados > 0:
-            cursor.execute("UPDATE Inventario SET cant_total = GREATEST(0, cant_total - %s) WHERE tipo_garrafon LIKE %s", (insumos_usados, '%tapas%'))
-            cursor.execute("UPDATE Inventario SET cant_total = GREATEST(0, cant_total - %s) WHERE tipo_garrafon LIKE %s", (insumos_usados, '%sellos%'))
+            cursor.execute("UPDATE Inventario SET cant_total = GREATEST(0, cant_total - %s), u_actualizacion = %s WHERE tipo_garrafon LIKE %s", (insumos_usados, ahora_mx, '%tapas%'))
+            cursor.execute("UPDATE Inventario SET cant_total = GREATEST(0, cant_total - %s), u_actualizacion = %s WHERE tipo_garrafon LIKE %s", (insumos_usados, ahora_mx, '%sellos%'))
         if mermas > 0:
-            cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s WHERE tipo_garrafon LIKE %s", (mermas, '%merma%'))
+            cursor.execute("UPDATE Inventario SET cant_total = cant_total + %s, u_actualizacion = %s WHERE tipo_garrafon LIKE %s", (mermas, ahora_mx, '%merma%'))
             cursor.execute("INSERT INTO Historial_mermas (cant_mermas, tipo_mermas, fecha_hora, id_movimiento_fk) VALUES (%s, 'Mermas de Ruta', %s, %s)", (mermas, ahora_mx, id_mov))
         cursor.execute("""
             UPDATE Movimiento
